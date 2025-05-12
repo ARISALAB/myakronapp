@@ -1,305 +1,112 @@
 <!DOCTYPE html>
 <html lang="el">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Οικονομική Διαχείριση Εστιατορίου</title>
-
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Σύνδεση & Πληρωμή</title>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    :root {
-      --primary: #0d6efd;
-      --secondary: #f8f9fa;
-      --danger: #dc3545;
-      --gray: #6c757d;
-    }
-
     body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f1f3f5;
-      color: #212529;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    header {
-      background: white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      padding: 2rem 1rem;
+      font-family: sans-serif;
+      background: #f4f4f4;
       text-align: center;
-      position: relative;
+      padding-top: 50px;
     }
-
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-      color: var(--primary);
-    }
-
-    #user-info {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      background: #ffffffdd;
-      padding: 0.5rem 1rem;
-      border-radius: 2rem;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    }
-
-    #user-photo {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--primary);
-    }
-
     button {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 25px;
-      font-size: 1rem;
+      padding: 12px 24px;
+      font-size: 16px;
+      margin-top: 20px;
       cursor: pointer;
-      transition: background 0.3s ease;
     }
-
-    #login-btn {
-      background-color: var(--primary);
-      color: white;
-    }
-
-    #login-btn:hover {
-      background-color: #0b5ed7;
-    }
-
-    #logout-btn {
-      background-color: var(--danger);
-      color: white;
-      display: none; /* Θα ελέγχεται από το JS */
-    }
-
-    #logout-btn:hover {
-      background-color: #bb2d3b;
-    }
-
-    main {
-      flex-grow: 1;
-      padding: 2rem;
-      text-align: center;
-    }
-
-    main p {
-      font-size: 1.25rem;
-      color: var(--gray);
-    }
-
-    /* Στυλ για να κρύβουμε/εμφανίζουμε την εφαρμογή */
-    #app-content {
-      display: none; /* Κρύψε την εφαρμογή μέχρι να πληρώσει */
-      /* Πρόσθεσε εδώ τα στυλ για το περιεχόμενο της εφαρμογής σου */
-    }
-
-    footer {
-      background-color: white;
-      text-align: center;
-      padding: 1rem;
-      border-top: 1px solid #dee2e6;
-      font-size: 0.9rem;
-      color: #6c757d;
+    #user-info {
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
+  <h1>Restaurant Finance App</h1>
 
-  <header>
-    <h1>Οικονομική Διαχείριση Εστιατορίου</h1>
+  <div id="login-section">
+    <button id="google-login">Σύνδεση με Google</button>
+  </div>
 
-    <div id="user-info" style="display: none;">
-      <span id="user-greeting"></span>
-      <img id="user-photo" src="" alt="User photo" />
-    </div>
-
-    <button id="login-btn">🔐 Σύνδεση με Google</button>
-    <button id="logout-btn">🚪 Αποσύνδεση</button>
-  </header>
-
-  <main>
-    <p id="main-message">Παρακαλώ συνδεθείτε για να συνεχίσετε.</p>
-
-    <div id="payment-section" style="display: none; margin-top: 2rem;">
-      <p>Για να αποκτήσετε πλήρη πρόσβαση στην εφαρμογή, ολοκληρώστε την πληρωμή.</p>
-      <button id="pay-btn">💳 Πληρωμή με Viva Wallet (€10.00)</button>
-      <p id="payment-status-message" style="color: orange;"></p> </div>
-
-    <div id="app-content">
-      <h2>Καλώς ήρθατε στην Εφαρμογή!</h2>
-      <p>Εδώ θα εμφανίζονται τα εργαλεία διαχείρισης.</p>
-      </div>
-
-  </main>
-
-  <footer>
-    &copy; 2025 Η Εφαρμογή μου
-  </footer>
+  <div id="user-info" style="display:none;">
+    <p id="user-email"></p>
+    <button id="pay-button">Πληρωμή με Viva Wallet</button>
+    <button id="logout">Αποσύνδεση</button>
+  </div>
 
   <script>
+    // Firebase config
     const firebaseConfig = {
-      apiKey: "AIzaSyCQZMLh_gaiLWEtMw6VeDVXdkuNW64HgOE", // Βάλε το δικό σου API Key
-      authDomain: "restaurantfinanceapp.firebaseapp.com", // Βάλε το δικό σου Auth Domain
-      projectId: "restaurantfinanceapp", // Βάλε το δικό σου Project ID
-      storageBucket: "restaurantfinanceapp.appspot.com", // Βάλε το δικό σου Storage Bucket
-      messagingSenderId: "838820261500", // Βάλε το δικό σου Messaging Sender ID
-      appId: "1:838820261500:web:3582c04f2d678af088e3f9" // Βάλε το δικό σου App ID
+      apiKey: "AIzaSyCQZMLh_gaiLWEtMw6VeDVXdkuNW64HgOE",
+      authDomain: "restaurantfinanceapp.firebaseapp.com",
+      projectId: "restaurantfinanceapp",
+      storageBucket: "restaurantfinanceapp.appspot.com",
+      messagingSenderId: "838820261500",
+      appId: "1:838820261500:web:3582c04f2d678af088e3f9",
+      measurementId: "G-EM27Q8R9RZ"
     };
 
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.firestore(); // Αρχικοποίηση Firestore
-    const provider = new firebase.auth.GoogleAuthProvider();
 
-    const loginBtn = document.getElementById("login-btn");
-    const logoutBtn = document.getElementById("logout-btn");
-    const userInfo = document.getElementById("user-info");
-    const userGreeting = document.getElementById("user-greeting");
-    const userPhoto = document.getElementById("user-photo");
-    const mainMessage = document.getElementById("main-message");
-    const paymentSection = document.getElementById("payment-section");
-    const payBtn = document.getElementById("pay-btn");
-    const appContent = document.getElementById("app-content");
-    const paymentStatusMessage = document.getElementById("payment-status-message");
+    const loginBtn = document.getElementById('google-login');
+    const logoutBtn = document.getElementById('logout');
+    const payBtn = document.getElementById('pay-button');
+    const userInfo = document.getElementById('user-info');
+    const userEmail = document.getElementById('user-email');
 
-    // Function to check user's payment status from backend
-    async function checkPaymentStatus(userUid) {
-        try {
-            const response = await fetch(`/.netlify/functions/getUserPaymentStatus?uid=${userUid}`);
-            const data = await response.json();
-            return data.isPaid; // Το backend θα επιστρέψει { isPaid: true/false }
-        } catch (error) {
-            console.error("Error checking payment status:", error);
-            return false; // Assume not paid on error
-        }
+    loginBtn.onclick = () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(result => {
+          const user = result.user;
+          userEmail.textContent = "Συνδεδεμένος ως: " + user.email;
+          document.getElementById('login-section').style.display = 'none';
+          userInfo.style.display = 'block';
+        })
+        .catch(error => {
+          alert("Σφάλμα σύνδεσης: " + error.message);
+        });
+    };
+
+    logoutBtn.onclick = () => {
+      auth.signOut().then(() => {
+        userInfo.style.display = 'none';
+        document.getElementById('login-section').style.display = 'block';
+      });
+    };
+
+    payBtn.onclick = () => {
+  fetch('/.netlify/functions/createVivaOrder', {
+    method: 'POST',
+    body: JSON.stringify({
+      email: auth.currentUser.email,
+      fullName: auth.currentUser.displayName
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.checkoutUrl) {
+      window.location.href = data.checkoutUrl;
+    } else {
+      alert("Σφάλμα στη δημιουργία πληρωμής");
     }
-
-    // Function to update UI based on payment status
-    function updateUI(isPaid) {
-        if (isPaid) {
-            mainMessage.style.display = "none";
-            paymentSection.style.display = "none";
-            appContent.style.display = "block"; // Εμφάνιση του περιεχομένου της εφαρμογής
-        } else {
-            mainMessage.style.display = "block"; // Μπορείς να αλλάξεις το μήνυμα εδώ αν θες
-            mainMessage.textContent = "Παρακαλώ ολοκληρώστε την πληρωμή για πρόσβαση.";
-            paymentSection.style.display = "block"; // Εμφάνιση της ενότητας πληρωμής
-            appContent.style.display = "none"; // Κρύψε το περιεχόμενο της εφαρμογής
-        }
-    }
-
-    // Check auth state
-    auth.onAuthStateChanged(async user => {
-        if (user) {
-            // User is signed in
-            userGreeting.textContent = `Γεια σου, ${user.displayName}!`;
-            userPhoto.src = user.photoURL;
-            userInfo.style.display = "flex";
-            loginBtn.style.display = "none";
-            logoutBtn.style.display = "inline-block";
-
-            // Check payment status from backend
-            const isPaid = await checkPaymentStatus(user.uid);
-            updateUI(isPaid);
-
-            // Check for payment success/failure URL parameters (optional, secondary check)
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get("payment_status") === "success") {
-                 paymentStatusMessage.textContent = "Η πληρωμή ολοκληρώθηκε επιτυχώς! Ενεργοποιείται η πρόσβαση...";
-                 // Ideally, the backend webhook should handle the database update.
-                 // If the webhook failed, a refresh or subsequent login check will fix it.
-                 // You might want to remove the query parameter after processing
-                 // history.replaceState({}, document.title, window.location.pathname); // Remove ?payment_status=success from URL
-                 // Refresh payment status from backend
-                 const updatedIsPaid = await checkPaymentStatus(user.uid);
-                 updateUI(updatedIsPaid); // Update UI based on the confirmed status from backend
-                 paymentStatusMessage.textContent = updatedIsPaid ? "" : "Πρόβλημα με την επιβεβαίωση πληρωμής. Επικοινωνήστε με την υποστήριξη."; // Clear message or show error
-            } else if (urlParams.get("payment_status") === "failed") {
-                 paymentStatusMessage.textContent = "Η πληρωμή απέτυχε. Προσπαθήστε ξανά.";
-                 // Remove the query parameter
-                 // history.replaceState({}, document.title, window.location.pathname);
-                 updateUI(false); // Ensure payment section is shown
-            }
-
-
-        } else {
-            // User is signed out
-            userGreeting.textContent = "";
-            userPhoto.src = "";
-            userInfo.style.display = "none";
-            loginBtn.style.display = "inline-block";
-            logoutBtn.style.display = "none";
-            mainMessage.style.display = "block";
-            mainMessage.textContent = "Παρακαλώ συνδεθείτε για να συνεχίσετε.";
-            paymentSection.style.display = "none";
-            appContent.style.display = "none"; // Κρύψε το περιεχόμενο της εφαρμογής
-            paymentStatusMessage.textContent = ""; // Clear status message
-        }
+  });
+};
+     
+    // Αυτόματη επαναφορά χρήστη
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        userEmail.textContent = "Συνδεδεμένος ως: " + user.email;
+        document.getElementById('login-section').style.display = 'none';
+        userInfo.style.display = 'block';
+      }
     });
-
-    loginBtn.addEventListener("click", () => {
-      auth.signInWithPopup(provider).catch(err => console.error("Σφάλμα login:", err));
-    });
-
-    logoutBtn.addEventListener("click", () => {
-      auth.signOut().catch(err => console.error("Σφάλμα logout:", err));
-    });
-
-    // Handle pay button click
-    payBtn.addEventListener("click", async () => {
-        const user = auth.currentUser;
-        if (!user) {
-            alert("Πρέπει να είστε συνδεδεμένος για να πληρώσετε.");
-            return;
-        }
-
-        paymentStatusMessage.textContent = "Δημιουργία πληρωμής...";
-
-        try {
-            // Call the backend function to create the payment order
-            const response = await fetch("/.netlify/functions/createPayment", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    uid: user.uid, // Pass the user ID to the backend
-                    email: user.email,
-                    amount: 1000 // 1000 λεπτά = €10.00
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.redirectUrl) {
-                paymentStatusMessage.textContent = "Ανακατεύθυνση στη σελίδα πληρωμής...";
-                window.location.href = data.redirectUrl; // Redirect user to Viva Wallet checkout
-            } else {
-                paymentStatusMessage.textContent = "Αποτυχία δημιουργίας πληρωμής.";
-                console.error("Error from backend:", data.error);
-            }
-        } catch (err) {
-            paymentStatusMessage.textContent = "Σφάλμα επικοινωνίας με τον server πληρωμής.";
-            console.error("Σφάλμα πληρωμής:", err);
-        }
-    });
-
   </script>
-
 </body>
 </html>
