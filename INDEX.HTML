@@ -5,22 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Σύνδεση και Πληρωμή για την Εφαρμογή</title>
     <link rel="stylesheet" href="style.css">
-<script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.x/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.x/firebase-auth-compat.js"></script>
     </head>
 <body>
     <div class="container">
         <h1>Καλώς ορίσατε!</h1>
 
-       <div id="auth-section">
-            <p id="auth-message">Παρακαλώ συνδεθείτε με τον λογαριασμό σας Google.</p>
+        <div id="auth-section">
+            <p id="auth-message">Παρακαλώ συνδεθείτε:</p>
+
             <button id="google-signin-button">Σύνδεση με Google</button>
+
+            <p style="margin-top: 20px; margin-bottom: 10px;">Ή με email και κωδικό:</p>
+
+            <div id="email-password-form">
+                <input type="email" id="email-input" placeholder="Email">
+                <input type="password" id="password-input" placeholder="Κωδικός">
+                <button id="email-signin-button">Σύνδεση με Email</button>
+                <button id="email-signup-button">Εγγραφή με Email</button>
+            </div>
+
+             <p style="margin-top: 20px; margin-bottom: 10px;">Ή με GitHub:</p>
+
+            <button id="github-signin-button">Σύνδεση με GitHub</button>
+
+
             <div id="user-info" class="hidden">
                 <img id="user-photo" src="" alt="Φωτογραφία χρήστη">
                 <span id="user-name"></span>
             </div>
+
             <div id="auth-status"></div> </div>
-     <div id="payment-section" class="hidden">
+
+        <div id="payment-section" class="hidden">
             <p>Για να αποκτήσετε πρόσβαση στην εφαρμογή, απαιτείται πληρωμή.</p>
             <button id="viva-payment-button">Πληρωμή μέσω Viva Wallet</button>
             <div id="payment-status"></div>
@@ -32,6 +50,6 @@
             <button id="signout-button-app">Αποσύνδεση</button> </div>
     </div>
 
-        <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
