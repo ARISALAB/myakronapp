@@ -1,42 +1,51 @@
-// functions/get-viva-token.js
 const fetch = require('node-fetch');
 
-exports.handler = async function(event, context) {
+exports.handler = async function (event, context) {
   const clientId = process.env.VIVA_CLIENT_ID;
   const clientSecret = process.env.VIVA_CLIENT_SECRET;
-  const url = 'https://demo.vivapayments.com/connect/token';
 
-  const body = new URLSearchParams({
-    grant_type: 'client_credentials',
-    client_id: clientId,
-    client_secret: clientSecret,
-    scope: 'payment'
-  });
+  if (!clientId || !clientSecret) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Missing client credentials' }),
+    };
+  }
+
+  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
   try {
-    const response = await fetch(url, {
+    const response = await fetch('https://accounts.vivapayments.com/connect/token', {
       method: 'POST',
-      body: body,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      headers: {
+        Authorization: `Basic ${credentials}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'client_credentials',
+        scope: 'payments orders',
+      }),
     });
 
-    const data = await response.json();
-    if (data.error) {
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Viva token error response:', errorText);
       return {
-        statusCode: 400,
-        body: JSON.stringify(data)
+        statusCode: response.status,
+        body: JSON.stringify({ error: 'Failed to get access token from Viva' }),
       };
     }
 
-    // Επιστρέφουμε το token
+    const data = await response.json();
+
     return {
       statusCode: 200,
-      body: JSON.stringify({ access_token: data.access_token })
+      body: JSON.stringify({ access_token: data.access_token }),
     };
   } catch (error) {
+    console.error('Token fetch failed:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message })
+      body: JSON.stringify({ error: 'Internal server error' }),
     };
   }
 };
