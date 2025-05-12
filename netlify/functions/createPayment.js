@@ -1,9 +1,10 @@
 // netlify/functions/createPayment.js
 const axios = require("axios");
-const admin = require('firebase-admin'); // Προσθήκη για πλήρη κώδικα, αν λείπει
+const admin = require('firebase-admin'); // Χρειάζεται για την αρχικοποίηση της Admin SDK
 
-// Αρχικοποίηση Firebase Admin SDK
-if (!admin.apps.length) {
+// Αρχικοποίηση Firebase Admin SDK για πρόσβαση στη DB (κοινό σε όλες τις functions που την χρειάζονται)
+// Αυτό το block εκτελείται μία φορά κατά το "cold start" της function
+if (!admin.apps || admin.apps.length === 0) { // Έλεγχος αν έχει ήδη αρχικοποιηθεί
   try {
     // Βεβαιώσου ότι η Environment Variable FIREBASE_SERVICE_ACCOUNT_KEY είναι σωστή JSON string
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
@@ -11,13 +12,14 @@ if (!admin.apps.length) {
       credential: admin.credential.cert(serviceAccount),
       // Αν θες να ορίσεις Project ID μέσω κώδικα και όχι μόνο μεταβλητή, πρόσθεσέ το εδώ:
       // projectId: process.env.FIREBASE_PROJECT_ID,
+      // Εάν χρησιμοποιείς Realtime Database, πρόσθεσε και την databaseURL
+      // databaseURL: `https://${process.env.FIREBASE_PROJECT_ID}.firebaseio.com`
     });
+    console.log("Firebase Admin SDK initialized successfully in createPayment.");
   } catch (e) {
-    console.error("Failed to initialize Firebase Admin in createPayment:", e); // Άλλαξε το μήνυμα για να ξέρεις από ποια function είναι
-    // Η function θα αποτύχει αν δεν αρχικοποιηθεί η Admin SDK
-    // Μπορείς να επιστρέψεις ένα σφάλμα εδώ αν θες να αποτρέψεις την εκτέλεση
-    // return { statusCode: 500, body: JSON.stringify({ error: "Failed Firebase Init" }) };
-    // Αλλά το Netlify θα το πιάσει ως Uncaught Exception αν δεν επιστρέψεις απάντηση
+    console.error("Failed to initialize Firebase Admin in createPayment:", e);
+    // Η function θα αποτύχει αν δεν αρχικοποιηθεί η Admin SDK.
+    // Το Netlify θα το πιάσει ως Uncaught Exception ή θα επιστρέψει 500/502.
   }
 }
 // Μπορείς να ορίσεις τη βάση δεδομένων εδώ, αν η αρχικοποίηση πέτυχε
@@ -30,7 +32,7 @@ const clientId = process.env.VIVA_CLIENT_ID;
 const clientSecret = process.env.VIVA_CLIENT_SECRET;
 
 // Επιλέγει τις URLs ανάλογα με το περιβάλλον (production ή development/testing)
-// Βεβαιώσου ότι έχεις ρυθμίσει την Environment Variable NODE_ENV στο Netlify.
+// Βεβαιώσου ότι έχεις ρυθμίσει την Environment Variable NODE_ENV στο Netlify (π.χ. 'production' ή 'development').
 const baseUrl = process.env.NODE_ENV === 'production'
     ? 'https://api.vivapayments.com' // Production URL
     : 'https://demo.vivapayments.com'; // Demo/Sandbox URL (Για δοκιμές)
@@ -39,31 +41,26 @@ const accountsUrl = process.env.NODE_ENV === 'production'
     : 'https://demoaccounts.vivapayments.com/connect/token'; // Demo/Sandbox URL
 
 // Οι URL στις οποίες η Viva Wallet θα ανακατευθύνει τον χρήστη ή θα στείλει ειδοποίηση.
-// ΑΝΤΙΚΑΤΑΣΤΗΣΕ ΤΟ 'YOUR_APP_DOMAIN' με το πραγματικό domain της εφαρμογής σου στο Netlify!
-// Π.χ. 'https://myakronapp.netlify.app'
-const appDomain = process.env.VIVA_SUCCESS_DOMAIN || 'https://myakronapp.netlify.app';
+// ΑΝΤΙΚΑΤΑΣΤΗΣΕ ΤΟ 'myakronapp.netlify.app' με το πραγματικό domain της εφαρμογής σου στο Netlify!
+const YOUR_APP_DOMAIN = 'myakronapp.netlify.app'; // <--- ΑΝΤΙΚΑΤΑΣΤΗΣΕ ΜΕ ΤΟ ΔΙΚΟ ΣΟΥ DOMAIN!
 
-const successUrl = `${appDomain}/?payment_status=success`;
-const failureUrl = `${appDomain}/?payment_status=failed`;
-const sourceUrl = `${appDomain}/.netlify/functions/paymentWebhook`;
-
-// Βεβαιώσου ότι έχεις αντικαταστήσει το YOUR_APP_DOMAIN παραπάνω με το δικό σου domain!
-// Για παράδειγμα, αν το domain σου είναι myakronapp.netlify.app:
-// const successUrl = `https://myakronapp.netlify.app/?payment_status=success`;
-// const failureUrl = `https://myakronapp.netlify.app/?payment_status=failed`;
-// const sourceUrl = `https://myakronapp.netlify.app/.netlify/functions/paymentWebhook`;
+const successUrl = `https://${YOUR_APP_DOMAIN}/?payment_status=success`; // Ανακατεύθυνση πίσω στην αρχική σελίδα με success status
+const failureUrl = `https://${YOUR_APP_DOMAIN}/?payment_status=failed`; // Ανακατεύθυνση πίσω στην αρχική σελίδα με failed status
+const sourceUrl = `https://${YOUR_APP_DOMAIN}/.netlify/functions/paymentWebhook`; // Server-to-server notification (ΠΟΛΥ ΣΗΜΑΝΤΙΚΟ ΓΙΑ ΤΗΝ ΑΣΦΑΛΕΙΑ)
 
 
 exports.handler = async function (event, context) {
-    // Έλεγχος αν η Admin SDK αρχικοποιήθηκε
-    if (!admin.apps.length) {
-        console.error("Firebase Admin SDK not initialized. Cannot execute function.");
-        return { statusCode: 500, body: JSON.stringify({ error: "Server setup error" }) };
+    // Έλεγχος αν η Admin SDK αρχικοποιήθηκε σωστά (προαιρετικό, αλλά καλό για debug)
+    if (!admin.apps || admin.apps.length === 0) {
+        console.error("Firebase Admin SDK was not initialized before handler execution.");
+        return { statusCode: 500, body: JSON.stringify({ error: "Server initialization error" }) };
     }
-    // Μπορείς να ορίσεις τη βάση δεδομένων εδώ αν χρειάζεται
-    // const db = admin.firestore(); // Ή admin.database()
+     // Ορισμός Firestore ή Realtime DB instance αν χρειάζεται εδώ ή παραπάνω
+    // const db = admin.firestore();
+
 
     if (event.httpMethod !== "POST") {
+        console.warn(`Method Not Allowed: ${event.httpMethod}`);
         return { statusCode: 405, body: "Method Not Allowed" };
     }
 
@@ -85,8 +82,10 @@ exports.handler = async function (event, context) {
     }
 
     try {
-        // ΠΡΟΣΘΕΣΕ ΑΥΤΗ ΤΗ ΓΡΑΜΜΗ ΓΙΑ DEBUGGING
-        console.log("Attempting to connect to URL:", accountsUrl);
+        // ----------- Debugging Log ---------------
+        // Αυτό το log θα εμφανιστεί στα Function logs για να επιβεβαιώσουμε την URL
+        console.log("Attempting to obtain Viva Wallet access token from URL:", accountsUrl);
+        // -----------------------------------------
 
 
         // 1. Απόκτηση access token από τη Viva Wallet
@@ -116,7 +115,7 @@ exports.handler = async function (event, context) {
         const paymentResponse = await axios.post(
             createOrderUrl, // Χρησιμοποιείται εδώ
             {
-                amount: amount, // Ποσό σε λεπτά
+                amount: amount, // Ποσό σε λεπτά (1000 = 10.00 Ευρώ) - Βεβαιώσου ότι είναι το σωστό ποσό
                 customer: { // Προσθήκη στοιχείων πελάτη (καλό για logging στη Viva)
                    email: email,
                    customerText: `Firebase UID: ${uid}` // Αποθήκευση του UID για εύκολη αναγνώριση στο webhook
@@ -125,7 +124,7 @@ exports.handler = async function (event, context) {
                 callbackUrls: {
                    success: successUrl,
                    failure: failureUrl,
-                   source: sourceUrl
+                   source: sourceUrl // Η πιο ασφαλής για την ενημέρωση της DB
                 },
                 // Μπορείς να προσθέσεις περισσότερα στοιχεία όπως merchantReference
                 // merchantReference: `order-${uid}-${Date.now()}`
@@ -148,10 +147,11 @@ exports.handler = async function (event, context) {
             body: JSON.stringify({ redirectUrl }),
         };
     } catch (err) {
+        // Αυτό το block πιάνει σφάλματα από τις κλήσεις axios ή άλλα απρόβλεπτα σφάλματα
         console.error("Viva Wallet createPayment error:", err.response?.data || err.message);
         // Επιστροφή σφάλματος στο frontend
         return {
-            statusCode: err.response?.status || 500,
+            statusCode: err.response?.status || 500, // Επιστρέφει τον statusCode από την απάντηση Viva αν υπάρχει
             body: JSON.stringify({ error: err.response?.data || "Πρόβλημα με τη δημιουργία πληρωμής" }),
         };
     }
