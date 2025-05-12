@@ -111,3 +111,68 @@ button {
 .hidden {
     display: none !important; /* Προστέθηκε !important */
 }
+/* Styling για τις επιλογές σύνδεσης */
+#auth-section button {
+    margin: 10px auto; /* Κεντράρισμα κουμπιών */
+    display: block; /* Κάθε κουμπί σε νέα γραμμή */
+    width: 80%; /* Μικρότερο πλάτος */
+    max-width: 300px; /* Μέγιστο πλάτος */
+}
+
+#email-password-form {
+    display: flex;
+    flex-direction: column; /* Τα στοιχεία το ένα κάτω από το άλλο */
+    gap: 10px; /* Κενό μεταξύ των στοιχείων */
+    margin: 20px auto;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    width: 80%; /* Πλάτος φόρμας */
+    max-width: 300px; /* Μέγιστο πλάτος φόρμας */
+}
+
+#email-password-form input[type="email"],
+#email-password-form input[type="password"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+#email-password-form button {
+     margin: 0; /* Καταργούμε το auto margin για τα κουμπιά της φόρμας */
+     width: 100%; /* Γεμίζουν το πλάτος της φόρμας */
+}
+
+#email-signin-button {
+     background-color: #5cb85c; /* Πράσινο */
+     color: white;
+}
+#email-signin-button:hover {
+    background-color: #4cae4c;
+}
+
+#email-signup-button {
+    background-color: #f0ad4e; /* Πορτοκαλί */
+    color: white;
+}
+#email-signup-button:hover {
+     background-color: #ec971f;
+}
+
+#github-signin-button {
+    background-color: #333; /* Σκούρο γκρι/μαύρο GitHub */
+    color: white;
+}
+#github-signin-button:hover {
+     background-color: #555;
+}
+
+
+/* (Ο υπόλοιπος CSS κώδικας, συμπεριλαμβανομένων των .hidden και #user-info, παραμένει) */
+
+#user-info {
+    /* ... (υπάρχον styling) ... */
+     margin: 20px auto; /* Κεντράρισμα και αυτού του κουτιού */
+}
