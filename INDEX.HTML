@@ -11,23 +11,64 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 2rem; background: #f4f4f4; }
-    header { position: relative; padding-bottom: 2rem; }
-    #user-greeting { position: absolute; top: 0; right: 180px; }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background: #f4f4f4;
+    }
+
+    header {
+      position: relative;
+      padding-bottom: 2rem;
+    }
+
+    #user-info {
+      position: absolute;
+      top: 0;
+      right: 180px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #user-photo {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #4285F4;
+    }
+
     #login-btn, #logout-btn {
-      padding: 0.5rem 1rem; margin: 0.5rem;
-      border: none; border-radius: 5px; cursor: pointer;
+      padding: 0.5rem 1rem;
+      margin: 0.5rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
-    #login-btn { background: #4285F4; color: white; }
-    #logout-btn { background: #DB4437; color: white; display: none; }
+
+    #login-btn {
+      background: #4285F4;
+      color: white;
+    }
+
+    #logout-btn {
+      background: #DB4437;
+      color: white;
+      display: none;
+    }
   </style>
 </head>
 <body>
 
   <header>
     <h1>Οικονομική Διαχείριση Εστιατορίου</h1>
-    <span id="user-greeting"></span>
+    <div id="user-info" style="display: none;">
+      <span id="user-greeting"></span>
+      <img id="user-photo" src="" alt="User photo" />
+    </div>
     <button id="login-btn">Σύνδεση με Google</button>
     <button id="logout-btn">Αποσύνδεση</button>
   </header>
@@ -41,7 +82,6 @@
   </footer>
 
   <script>
-    // **ΣΩΣΤΟ firebaseConfig** από το Firebase Console → Project Settings → General → Your apps
     const firebaseConfig = {
       apiKey: "AIzaSyCQZMLh_gaiLWEtMw6VeDVXdkuNW64HgOE",
       authDomain: "restaurantfinanceapp.firebaseapp.com",
@@ -50,34 +90,37 @@
       messagingSenderId: "838820261500",
       appId: "1:838820261500:web:3582c04f2d678af088e3f9"
     };
-    // Initialize Firebase
+
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const provider = new firebase.auth.GoogleAuthProvider();
 
     const loginBtn = document.getElementById("login-btn");
     const logoutBtn = document.getElementById("logout-btn");
+    const userInfo = document.getElementById("user-info");
     const userGreeting = document.getElementById("user-greeting");
+    const userPhoto = document.getElementById("user-photo");
 
-    // Παρακολούθηση κατάστασης σύνδεσης
     auth.onAuthStateChanged(user => {
       if (user) {
         userGreeting.textContent = `Καλώς ήρθες, ${user.displayName}!`;
+        userPhoto.src = user.photoURL;
+        userInfo.style.display = "flex";
         loginBtn.style.display = "none";
         logoutBtn.style.display = "inline-block";
       } else {
         userGreeting.textContent = "";
+        userPhoto.src = "";
+        userInfo.style.display = "none";
         loginBtn.style.display = "inline-block";
         logoutBtn.style.display = "none";
       }
     });
 
-    // Login
     loginBtn.addEventListener("click", () => {
       auth.signInWithPopup(provider).catch(err => console.error("Σφάλμα login:", err));
     });
 
-    // Logout
     logoutBtn.addEventListener("click", () => {
       auth.signOut().catch(err => console.error("Σφάλμα logout:", err));
     });
