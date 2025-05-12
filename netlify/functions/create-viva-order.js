@@ -82,11 +82,11 @@ exports.handler = async (event, context) => {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Authorization': `Basic ${base64AuthString}`
             },
-            body: new URLSearchParams({ // Το σώμα πρέπει να είναι urlencoded
-                'grant_type': 'client_credentials',
-                'scope': 'create_order' // Ζητάμε άδεια μόνο για δημιουργία παραγγελίας
-            })
-        });
+          body: new URLSearchParams({
+  'grant_type': 'client_credentials',
+  'scope': 'payments orders' // ← ΑΥΤΟ ΕΔΩ ΕΙΝΑΙ ΤΟ ΣΩΣΤΟ scope για Smart Checkout
+})
+
 
         if (!tokenResponse.ok) {
             const errorBody = await tokenResponse.text();
