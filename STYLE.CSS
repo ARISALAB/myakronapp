@@ -109,5 +109,5 @@ button {
 
 /* Κράτα την κλάση hidden όπως είναι */
 .hidden {
-    display: none;
+    display: none !important; /* Προστέθηκε !important */
 }
