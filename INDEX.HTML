@@ -82,23 +82,35 @@
       });
     };
 
-    payBtn.onclick = () => {
+   payBtn.onclick = async () => {
+  if (!auth.currentUser) {
+    alert("Παρακαλώ συνδεθείτε πρώτα.");
+    return;
+  }
+
+  const idToken = await auth.currentUser.getIdToken();
+
   fetch('/.netlify/functions/createVivaOrder', {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + idToken
+    },
     body: JSON.stringify({
       email: auth.currentUser.email,
       fullName: auth.currentUser.displayName
     })
   })
-  .then(res => res.json())
-  .then(data => {
-    if (data.checkoutUrl) {
-      window.location.href = data.checkoutUrl;
-    } else {
-      alert("Σφάλμα στη δημιουργία πληρωμής");
-    }
-  });
+    .then(res => res.json())
+    .then(data => {
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        alert("Σφάλμα στη δημιουργία πληρωμής");
+      }
+    });
 };
+
      
     // Αυτόματη επαναφορά χρήστη
     auth.onAuthStateChanged(user => {
