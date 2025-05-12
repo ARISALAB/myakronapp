@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Οικονομική Διαχείριση Εστιατορίου - Αρχική</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Add any specific inline styles for the index page here if needed */
+        /* For example, styles for sections or calls to action */
+
+        .hero-section {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); /* Gradient background */
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .hero-section h1 {
+            color: white; /* Ensure title is white */
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .hero-section p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto; /* Center the paragraph */
+        }
+
+        .features-section, .benefits-section, .cta-section {
+            padding: 40px 20px;
+            margin-bottom: 30px;
+        }
+
+        .features-section {
+             background-color: var(--secondary-background); /* Light background */
+        }
+
+         .benefits-section {
+             /* Default background */
+         }
+
+         .cta-section {
+             text-align: center;
+              background-color: var(--primary-color); /* Primary color background */
+              color: white;
+              padding: 50px 20px;
+         }
+
+          .cta-section h2 {
+              color: white; /* Ensure title is white */
+               margin-bottom: 20px;
+          }
+
+        .features-list {
+            list-style: none; /* Remove default list style */
+            padding: 0;
+            display: flex; /* Use flexbox for layout */
+            flex-wrap: wrap; /* Allow items to wrap */
+            justify-content: center; /* Center items */
+            gap: 20px; /* Space between items */
+        }
+
+        .feature-item {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 300px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+             flex: 1 1 300px; /* Flex properties */
+             box-sizing: border-box; /* Include padding and border in the element's total width and height */
+             display: flex; /* Use flexbox for internal layout */
+             flex-direction: column; /* Stack content vertically */
+             justify-content: space-between; /* Push visual to bottom if content height varies */
+        }
+
+         .feature-item h3 {
+             color: var(--primary-color);
+             margin-top: 0;
+             margin-bottom: 10px;
+         }
+
+         .feature-item p {
+             font-size: 0.95em;
+             color: var(--text-color);
+             line-height: 1.5;
+             margin-bottom: 15px; /* Add space before the visual */
+         }
+
+         /* --- Styles for the Feature Visual Bars --- */
+         .feature-visual {
+             display: flex; /* Arrange bars in a row */
+             justify-content: space-around; /* Distribute space around bars */
+             align-items: flex-end; /* Align bars to the bottom */
+             height: 50px; /* Fixed height for the visual area */
+             margin-top: auto; /* Push the visual to the bottom of the flex item */
+             padding-top: 10px; /* Space above the bars */
+             border-top: 1px solid #eee; /* Optional separator line */
+         }
+
+         .feature-visual .bar {
+             width: 12%; /* Width of each bar */
+             background-color: var(--primary-color); /* Color of the bars */
+             border-radius: 2px 2px 0 0; /* Rounded top corners */
+             transition: height 0.5s ease; /* Smooth transition for height change */
+         }
+
+         /* Example heights for the bars (can be adjusted) */
+         .feature-visual .bar:nth-child(1) { height: 40%; background-color: #28a745; } /* Income color */
+         .feature-visual .bar:nth-child(2) { height: 65%; }
+         .feature-visual .bar:nth-child(3) { height: 50%; background-color: #dc3545; } /* Expense color */
+         .feature-visual .bar:nth-child(4) { height: 80%; }
+         .feature-visual .bar:nth-child(5) { height: 70%; background-color: #ffc107; } /* Another color */
+
+
+         /* Optional: Hover effect on the feature item */
+         .feature-item:hover .feature-visual .bar {
+             height: 95%; /* Make bars grow on hover */
+             /* background-color: var(--secondary-color); Change color on hover */
+         }
+
+
+         .benefits-list {
+             list-style: disc;
+             max-width: 800px;
+             margin: 20px auto;
+             padding-left: 30px;
+             font-size: 1.1em;
+             line-height: 1.8;
+         }
+
+         .benefits-list li {
+             margin-bottom: 10px;
+         }
+
+         .benefits-list strong {
+             color: var(--primary-color);
+         }
+
+
+        /* Ensure main content area styling doesn't conflict */
+         main {
+            padding: 20px; /* Add some padding around the main content */
+         }
+
+         .container {
+            max-width: 1000px; /* Optional: Constrain content width */
+            margin: 0 auto; /* Center container */
+         }
+
+          /* Responsive adjustments */
+         @media (max-width: 768px) {
+             .hero-section h1 {
+                 font-size: 2em;
+             }
+
+             .hero-section p {
+                 font-size: 1em;
+             }
+
+             .features-list {
+                 flex-direction: column; /* Stack features on smaller screens */
+                 align-items: center; /* Center stacked items */
+             }
+
+             .feature-item {
+                 max-width: 95%; /* Allow items to take more width */
+             }
+
+              .feature-visual {
+                  height: 40px; /* Smaller visual height on small screens */
+              }
+
+              .feature-visual .bar {
+                  width: 15%; /* Adjust bar width */
+              }
+
+             .benefits-list {
+                 padding-left: 20px;
+                 font-size: 1em;
+             }
+         }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Οικονομική Διαχείριση Εστιατορίου</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Αρχική</a></li>
+            <li><a href="income.html">Έσοδα Ημέρας</a></li>
+            <li><a href="expenses.html">Έξοδα Ημέρας</a></li>
+            <li><a href="suppliers.html">Προμηθευτές</a></li>
+            <li class="dropdown">
+                <a href="#">Αναφορές ▼</a>
+                <ul class="dropdown-menu">
+                    <li><a href="daily-report.html">Ημερήσια Αναφορά</a></li>
+                    <li><a href="weekly-report.html">Εβδομαδιαία Αναφορά</a></li>
+                    <li><a href="monthly-report.html">Μηνιαία Αναφορά</a></li>
+                    <li><a href="annual-report.html">Ετήσια Αναφορά</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    
+
+    <main>
+        <section class="hero-section">
+            <div class="container">
+                <h1>Ελέγξτε και Βελτιστοποιήστε τα Οικονομικά του Εστιατορίου σας</h1>
+                <p>Η εφαρμογή σας προσφέρει απλό, γρήγορο και ισχυρό έλεγχο στα έσοδα, τα έξοδα, τους προμηθευτές και τους κρίσιμους δείκτες όπως το Food Cost.</p>
+            </div>
+        </section>
+
+        <section class="features-section">
+            <div class="container">
+                <h2>Βασικές Λειτουργίες</h2>
+                <ul class="features-list">
+                    <li class="feature-item">
+                        <h3>Καταγραφή Εσόδων & Εξόδων</h3>
+                        <p>Καταγράψτε εύκολα όλα τα ημερήσια έσοδα (μετρητά, κάρτα) και έξοδα (μετρητά, κάρτα, πίστωση), κατηγοριοποιώντας τα έξοδα για λεπτομερή παρακολούθηση, συμπεριλαμβανομένου του Food Cost (FC).</p>
+                         <div class="feature-visual">
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                         </div>
+                    </li>
+                    <li class="feature-item">
+                        <h3>Διαχείριση Προμηθευτών</h3>
+                        <p>Διατηρήστε έναν οργανωμένο κατάλογο προμηθευτών και καταγράψτε έξοδα επί πιστώσει ανά προμηθευτή για καλύτερη παρακολούθηση οφειλών και πληρωμών.</p>
+                         <div class="feature-visual">
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                         </div>
+                    </li>
+                    <li class="feature-item">
+                        <h3>Ημερήσιες Αναφορές</h3>
+                        <p>Δείτε μια άμεση σύνοψη των εσόδων, εξόδων και του ταμειακού υπολοίπου για κάθε επιλεγμένη ημέρα.</p>
+                         <div class="feature-visual">
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                         </div>
+                    </li>
+                    <li class="feature-item">
+                        <h3>Εβδομαδιαίες Αναφορές</h3>
+                        <p>Λάβετε μια ολοκληρωμένη αναφορά 7 ημερών με ανάλυση εσόδων/εξόδων ανά ημέρα, συνοπτικά στοιχεία, έξοδα επί πιστώσει ανά προμηθευτή και λεπτομερή ανάλυση του Food Cost (FC).</p>
+                         <div class="feature-visual">
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                         </div>
+                    </li>
+                    <li class="feature-item">
+                        <h3>Ανάλυση Food Cost (FC)</h3>
+                        <p>Υπολογίστε αυτόματα το Food Cost για το επιλεγμένο 7ήμερο διάστημα και λάβετε συγκεκριμένα συμπεράσματα και προτάσεις βασισμένα στα δικά σας δεδομένα για βελτιστοποίηση.</p>
+                         <div class="feature-visual">
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                         </div>
+                    </li>
+                     <li class="feature-item">
+                        <h3>Εξαγωγή σε PDF</h3>
+                        <p>Εξάγετε εύκολα τις εβδομαδιαίες αναφορές σας σε αρχείο PDF για αρχειοθέτηση, κοινή χρήση ή εκτύπωση, με καθαρή δομή και σωστή διάταξη σελίδων.</p>
+                         <div class="feature-visual">
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                             <div class="bar"></div>
+                         </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="benefits-section">
+            <div class="container">
+                <h2>Οφέλη για την Επιχείρησή σας</h2>
+                <ul class="benefits-list">
+                    <li><strong>Ακριβής Εικόνα:</strong> Αποκτήστε ξεκάθαρη και άμεση εικόνα των οικονομικών κινήσεων.</li>
+                    <li><strong>Βελτιωμένος Έλεγχος:</strong> Ελέγξτε αποτελεσματικά έσοδα, έξοδα, οφειλές προμηθευτών και το κρίσιμο Food Cost.</li>
+                    <li><strong>Βελτιστοποίηση Κέρδους:</strong> Εντοπίστε ευκαιρίες μείωσης κόστους και αύξησης της κερδοφορίας, ειδικά μέσω της ανάλυσης FC.</li>
+                    <li><strong>Εξοικονόμηση Χρόνου:</strong> Απλοποιήστε τη διαδικασία καταγραφής και αναφοράς σε σχέση με χειρόγραφες μεθόδους ή πολύπλοκα λογισμικά.</li>
+                    <li><strong>Εύκολη Πρόσβαση:</strong> Τα δεδομένα είναι προσβάσιμα τοπικά στον υπολογιστή σας, χωρίς την ανάγκη σύνδεσης στο internet (Local Storage).</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="container">
+                <h2>Είστε Έτοιμοι να Αναλάβετε τον Έλεγχο;</h2>
+                <p>Ξεκινήστε σήμερα να καταγράφετε τα οικονομικά σας στοιχεία και δείτε άμεσα τα οφέλη στη διαχείριση του εστιατορίου σας.</p>
+                <a href="income.html" class="button primary-button" style="margin-top: 20px;">Ξεκινήστε Καταγραφή Εσόδων</a>
+                 <a href="expenses.html" class="button primary-button" style="margin-top: 20px; margin-left: 15px;">Ξεκινήστε Καταγραφή Εξόδων</a>
+            </div>
+        </section>
+
+
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script>
+      // TODO: Βάλε τα δικά σου στοιχεία από το Firebase project
+      const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        appId: "YOUR_APP_ID"
+      };
+      firebase.initializeApp(firebaseConfig);
+    </script>
+    
+    <footer>
+        <p>&copy; 2023 Η Εφαρμογή μου</p>
+    </footer>
+
+</body>
+</html>
