@@ -1,0 +1,16 @@
+{
+  "name": "my-netlify-functions",
+  "version": "1.0.0",
+  "description": "Dependencies for Netlify functions",
+  "main": "functions/index.js", // Αυτό το πεδίο δεν χρησιμοποιείται απαραίτητα από το Netlify Functions, αλλά είναι τυπικό
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.x.x", // Χρησιμοποίησε την τελευταία σταθερή έκδοση (π.χ. "^1.6.2")
+    "firebase-admin": "^11.x.x" // Χρησιμοποίησε την τελευταία σταθερή έκδοση (π.χ. "^11.11.1")
+  }
+}
