@@ -46,8 +46,6 @@ const appDomain = process.env.VIVA_SUCCESS_DOMAIN || 'https://myakronapp.netlify
 const successUrl = `${appDomain}/?payment_status=success`;
 const failureUrl = `${appDomain}/?payment_status=failed`;
 const sourceUrl = `${appDomain}/.netlify/functions/paymentWebhook`;
-const failureUrl = `https://YOUR_APP_DOMAIN/?payment_status=failed`; // Ανακατεύθυνση πίσω στην αρχική σελίδα με failed status
-const sourceUrl = `https://YOUR_APP_DOMAIN/.netlify/functions/paymentWebhook`; // Server-to-server notification (ΠΟΛΥ ΣΗΜΑΝΤΙΚΟ ΓΙΑ ΤΗΝ ΑΣΦΑΛΕΙΑ)
 
 // Βεβαιώσου ότι έχεις αντικαταστήσει το YOUR_APP_DOMAIN παραπάνω με το δικό σου domain!
 // Για παράδειγμα, αν το domain σου είναι myakronapp.netlify.app:
