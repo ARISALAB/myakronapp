@@ -318,18 +318,39 @@
 
 
     </main>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-    <script>
-      // TODO: Βάλε τα δικά σου στοιχεία από το Firebase project
-      const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        projectId: "YOUR_PROJECT_ID",
-        appId: "YOUR_APP_ID"
-      };
-      firebase.initializeApp(firebaseConfig);
-    </script>
+ <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getAuth,
+    signInWithPopup,
+    GoogleAuthProvider,
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCQZMLh_gaiLWEtMw6VeDVXdkuNW64HgOE",
+    authDomain: "restaurantfinanceapp.firebaseapp.com",
+    projectId: "restaurantfinanceapp",
+    storageBucket: "restaurantfinanceapp.appspot.com",
+    messagingSenderId: "838820261500",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  document.getElementById("login-btn").addEventListener("click", () => {
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const user = result.user;
+        console.log("Συνδεδεμένος χρήστης:", user.displayName);
+        // π.χ. window.location.href = "/dashboard.html";
+      })
+      .catch((error) => {
+        console.error("Σφάλμα σύνδεσης:", error);
+      });
+  });
+</script>
+
     
     <footer>
         <p>&copy; 2023 Η Εφαρμογή μου</p>
