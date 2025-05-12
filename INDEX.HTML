@@ -1,136 +1,146 @@
 <!DOCTYPE html>
 <html lang="el">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Σύνδεση & Πληρωμή</title>
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f9f9f9;
-      text-align: center;
-      padding-top: 50px;
-    }
-    button {
-      padding: 12px 24px;
-      font-size: 16px;
-      margin-top: 20px;
-      cursor: pointer;
-      border: none;
-      border-radius: 6px;
-      background-color: #1976d2;
-      color: white;
-    }
-    button:hover {
-      background-color: #135ca1;
-    }
-    #user-info {
-      margin-top: 30px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device, initial-scale=1.0">
+    <title>Εφαρμογή μου</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        button {
+            margin: 10px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        #google-signin-button {
+            background-color: #4285F4;
+            color: white;
+        }
+        #google-signin-button:hover {
+            background-color: #357ae8;
+        }
+        #google-signout-button {
+            background-color: #db4437;
+            color: white;
+        }
+         #google-signout-button:hover {
+            background-color: #c33d2e;
+        }
+        #viva-wallet-payment-button {
+            background-color: #004a99; /* Viva Wallet blue */
+            color: white;
+        }
+         #viva-wallet-payment-button:hover {
+            background-color: #003a7a;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <h1>Restaurant Finance App</h1>
+    <div class="container">
+        <h1>Καλώς ορίσατε στην Εφαρμογή μου</h1>
 
-  <div id="login-section">
-    <button id="google-login">Σύνδεση με Google</button>
-  </div>
+        <div id="auth-status">
+            <p>Παρακαλώ συνδεθείτε.</p>
+        </div>
 
-  <div id="user-info" style="display:none;">
-    <p id="user-email"></p>
-    <button id="pay-button">Πληρωμή με Viva Wallet</button><br/>
-    <button id="logout">Αποσύνδεση</button>
-  </div>
+        <button id="google-signin-button">Σύνδεση με Google</button>
+        <button id="google-signout-button" class="hidden">Αποσύνδεση από Google</button>
 
-  <script>
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyCQZMLh_gaiLWEtMw6VeDVXdkuNW64HgOE",
-      authDomain: "restaurantfinanceapp.firebaseapp.com",
-      projectId: "restaurantfinanceapp",
-      storageBucket: "restaurantfinanceapp.appspot.com",
-      messagingSenderId: "838820261500",
-      appId: "1:838820261500:web:3582c04f2d678af088e3f9",
-      measurementId: "G-EM27Q8R9RZ"
-    };
+        <hr style="margin: 30px 0;">
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+        <button id="viva-wallet-payment-button">Πληρωμή μέσω Viva Wallet</button>
+    </div>
 
-    const loginBtn = document.getElementById('google-login');
-    const logoutBtn = document.getElementById('logout');
-    const payBtn = document.getElementById('pay-button');
-    const userInfo = document.getElementById('user-info');
-    const userEmail = document.getElementById('user-email');
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script>
+        // Replace with your actual Google Client ID
+        const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID';
 
-    loginBtn.onclick = () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then(result => {
-          const user = result.user;
-          userEmail.textContent = "Συνδεδεμένος ως: " + user.email;
-          document.getElementById('login-section').style.display = 'none';
-          userInfo.style.display = 'block';
-        })
-        .catch(error => {
-          alert("Σφάλμα σύνδεσης: " + error.message);
-        });
-    };
+        // Function to handle Google Sign-in
+        function handleCredentialResponse(response) {
+            // This function is called after successful sign-in.
+            // The 'response.credential' contains the ID token.
+            // You MUST send this token to your backend for verification.
+            console.log("Google ID Token:", response.credential);
 
-    logoutBtn.onclick = () => {
-      auth.signOut().then(() => {
-        userInfo.style.display = 'none';
-        document.getElementById('login-section').style.display = 'block';
-      });
-    };
+            // TODO: Send the token to your backend for verification and user session management.
+            // Example: fetch('/api/verify-google-token', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: response.credential }) });
 
-    payBtn.onclick = async () => {
-      const user = auth.currentUser;
-      if (!user) {
-        alert("Δεν είστε συνδεδεμένος.");
-        return;
-      }
-
-      const idToken = await user.getIdToken();
-
-      fetch('/.netlify/functions/createVivaOrder', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`
-        },
-        body: JSON.stringify({
-          email: user.email,
-          fullName: user.displayName
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.checkoutUrl) {
-          window.location.href = data.checkoutUrl;
-        } else {
-          alert("Σφάλμα στη δημιουργία πληρωμής");
+            document.getElementById('auth-status').innerText = 'Συνδεδεμένος με Google.';
+            document.getElementById('google-signin-button').classList.add('hidden');
+            document.getElementById('google-signout-button').classList.remove('hidden');
         }
-      })
-      .catch(err => {
-        console.error("Σφάλμα:", err);
-        alert("Αποτυχία επικοινωνίας με τον server");
-      });
-    };
 
-    // Αυτόματος έλεγχος κατά την εκκίνηση
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        userEmail.textContent = "Συνδεδεμένος ως: " + user.email;
-        document.getElementById('login-section').style.display = 'none';
-        userInfo.style.display = 'block';
-      }
-    });
-  </script>
+        // Function to handle Google Sign-out
+        function handleSignOut() {
+             // In a production app, you would also invalidate the session on your backend.
+             console.log('User signed out.');
+
+             document.getElementById('auth-status').innerText = 'Παρακαλώ συνδεθείτε.';
+             document.getElementById('google-signin-button').classList.remove('hidden');
+             document.getElementById('google-signout-button').classList.add('hidden');
+
+             // You might need additional steps here depending on how you manage sessions.
+        }
+
+        // Render the Google Sign-in button
+        // This uses the newer Identity Services library.
+        window.onload = function () {
+            google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleCredentialResponse // Function to call after sign-in
+            });
+             google.accounts.id.renderButton(
+                document.getElementById("google-signin-button"),
+                { theme: "outline", size: "large", text: "signin_with" }  // Customization options
+            );
+
+            // Add event listener for the sign-out button
+            document.getElementById('google-signout-button').addEventListener('click', handleSignOut);
+        };
+
+
+        // Function to initiate Viva Wallet payment (replace with your actual implementation)
+        document.getElementById('viva-wallet-payment-button').addEventListener('click', function() {
+            // TODO: Implement the actual Viva Wallet payment initiation.
+            // This will likely involve:
+            // 1. Making a request to your backend to create a payment order with Viva Wallet.
+            // 2. Your backend receives the payment URL or transaction ID from Viva Wallet.
+            // 3. Your frontend redirects the user to the Viva Wallet payment page using the URL
+            //    or uses a Viva Wallet SDK to open a payment modal.
+
+            alert("Εκκίνηση πληρωμής μέσω Viva Wallet... (Η λειτουργία δεν έχει υλοποιηθεί πλήρως)");
+
+            // Example (replace with actual Viva Wallet integration):
+            // window.location.href = 'YOUR_VIVA_WALLET_PAYMENT_URL';
+        });
+
+    </script>
 </body>
 </html>
