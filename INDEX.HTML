@@ -8,15 +8,11 @@
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBQwl0mNMXE3w6ZMgo23Q3qLhE3bgR8bKc&libraries=geometry,places&language=en-150&loading=async" async defer></script>
-
-  <!-- Google Identity Services -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
     body {
       font-family: sans-serif;
-      background: #f4f4f4;
+      background: #f9f9f9;
       text-align: center;
       padding-top: 50px;
     }
@@ -25,9 +21,16 @@
       font-size: 16px;
       margin-top: 20px;
       cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      background-color: #1976d2;
+      color: white;
+    }
+    button:hover {
+      background-color: #135ca1;
     }
     #user-info {
-      margin-top: 20px;
+      margin-top: 30px;
     }
   </style>
 </head>
@@ -40,7 +43,7 @@
 
   <div id="user-info" style="display:none;">
     <p id="user-email"></p>
-    <button id="pay-button">Πληρωμή με Viva Wallet</button>
+    <button id="pay-button">Πληρωμή με Viva Wallet</button><br/>
     <button id="logout">Αποσύνδεση</button>
   </div>
 
@@ -56,7 +59,6 @@
       measurementId: "G-EM27Q8R9RZ"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
@@ -66,7 +68,6 @@
     const userInfo = document.getElementById('user-info');
     const userEmail = document.getElementById('user-email');
 
-    // Google login
     loginBtn.onclick = () => {
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider)
@@ -81,7 +82,6 @@
         });
     };
 
-    // Logout
     logoutBtn.onclick = () => {
       auth.signOut().then(() => {
         userInfo.style.display = 'none';
@@ -89,43 +89,41 @@
       });
     };
 
-    // Viva Wallet Payment
- payBtn.onclick = async () => {
-  const user = auth.currentUser;
-  if (!user) {
-    alert("Δεν είστε συνδεδεμένος.");
-    return;
-  }
+    payBtn.onclick = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Δεν είστε συνδεδεμένος.");
+        return;
+      }
 
-  const idToken = await user.getIdToken(); // 🔐 Πάρε το Firebase ID Token
+      const idToken = await user.getIdToken();
 
-  fetch('/.netlify/functions/createVivaOrder', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${idToken}`, // ✅ Στείλε το token στον server
-    },
-    body: JSON.stringify({
-      email: user.email,
-      fullName: user.displayName
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.checkoutUrl) {
-      window.location.href = data.checkoutUrl;
-    } else {
-      alert("Σφάλμα στη δημιουργία πληρωμής");
-    }
-  })
-  .catch(err => {
-    console.error("Σφάλμα στο fetch:", err);
-    alert("Αποτυχία σύνδεσης με server");
-  });
-};
+      fetch('/.netlify/functions/createVivaOrder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          email: user.email,
+          fullName: user.displayName
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.checkoutUrl) {
+          window.location.href = data.checkoutUrl;
+        } else {
+          alert("Σφάλμα στη δημιουργία πληρωμής");
+        }
+      })
+      .catch(err => {
+        console.error("Σφάλμα:", err);
+        alert("Αποτυχία επικοινωνίας με τον server");
+      });
+    };
 
-
-    // Αν ο χρήστης είναι ήδη συνδεδεμένος
+    // Αυτόματος έλεγχος κατά την εκκίνηση
     auth.onAuthStateChanged(user => {
       if (user) {
         userEmail.textContent = "Συνδεδεμένος ως: " + user.email;
