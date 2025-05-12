@@ -3,258 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Εφαρμογή μου</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-        .container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        button {
-            margin: 10px;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-        }
-        #google-signin-button {
-            /* Google GSI library will render here */
-            margin: 10px auto; /* Center the button */
-            width: 200px; /* Adjust width as needed */
-        }
-        #google-signout-button {
-            background-color: #db4437;
-            color: white;
-        }
-         #google-signout-button:hover {
-            background-color: #c33d2e;
-        }
-        #viva-wallet-payment-button {
-            background-color: #004a99; /* Viva Wallet blue */
-            color: white;
-        }
-         #viva-wallet-payment-button:hover {
-            background-color: #003a7a;
-        }
-        .hidden {
-            display: none;
-        }
-        .loading-spinner {
-            display: none; /* Hidden by default */
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px auto; /* Center below button if needed */
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-    </style>
-</head>
+    <title>Σύνδεση και Πληρωμή για την Εφαρμογή</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/10.x/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.x/firebase-auth-compat.js"></script>
+    </head>
 <body>
     <div class="container">
-        <h1>Καλώς ορίσατε στην Εφαρμογή μου</h1>
+        <h1>Καλώς ορίσατε!</h1>
 
-        <div id="auth-status">
-            <p>Παρακαλώ συνδεθείτε.</p>
+        <div id="auth-section">
+            <p>Παρακαλώ συνδεθείτε με τον λογαριασμό σας Google.</p>
+            <button id="google-signin-button">Σύνδεση με Google</button>
+            <div id="auth-status"></div>
         </div>
 
-        <div id="google-signin-button"></div>
+        <div id="payment-section" class="hidden">
+            <p>Για να αποκτήσετε πρόσβαση στην εφαρμογή, απαιτείται πληρωμή.</p>
+            <button id="viva-payment-button">Πληρωμή μέσω Viva Wallet</button>
+            <div id="payment-status"></div>
+            <button id="signout-button" class="hidden">Αποσύνδεση</button> </div>
 
-        <button id="google-signout-button" class="hidden">Αποσύνδεση από Google</button>
-
-        <hr style="margin: 30px 0;">
-
-        <button id="viva-wallet-payment-button">Πληρωμή μέσω Viva Wallet</button>
-        <div id="payment-loading" class="loading-spinner"></div>
-
-
+        <div id="app-section" class="hidden">
+            <h2>Καλώς ορίσατε στην Εφαρμογή!</h2>
+            <p>Η πληρωμή σας ολοκληρώθηκε. Εδώ θα είναι το περιεχόμενο της εφαρμογής σας.</p>
+            <button id="signout-button-app">Αποσύνδεση</button> </div>
     </div>
 
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-    <script>
-        // **ΒΑΛΕ ΤΟ ΔΙΚΟ ΣΟΥ ΣΩΣΤΟ GOOGLE CLIENT ID ΕΔΩ**
-        const GOOGLE_CLIENT_ID = '838820261500-7hc9m96t87kh3scvlipsqbh6qjoijvup.apps.googleusercontent.com'; // Example Format - Use your actual ID
-
-
-        // **ΒΑΛΕ ΤΟ URL ΤΟΥ BACKEND ΣΟΥ ΕΔΩ**
-        // Κατά την ανάπτυξη: π.χ. 'http://localhost:3000' (ή τον port που τρέχει ο Node.js server σου)
-        // Στην παραγωγή: π.χ. 'https://your-backend-url.com'
-        const BACKEND_URL = 'http://localhost:3000'; // ΑΛΛΑΞΕ ΑΥΤΟ!
-
-
-        // Function to handle Google Sign-in (called by the GSI library after successful sign-in)
-        function handleCredentialResponse(response) {
-            console.log("Google ID Token:", response.credential);
-
-            // TODO: Send the token to your backend for verification and user session management.
-            // Example:
-            /*
-            fetch(`${BACKEND_URL}/api/verify-google-token`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: response.credential })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Backend verification response:', data);
-                if (data.success) {
-                    document.getElementById('auth-status').innerText = `Συνδεδεμένος ως ${data.user.email || 'χρήστης'}.`;
-                    document.getElementById('google-signin-button').style.display = 'none';
-                    document.getElementById('google-signout-button').classList.remove('hidden');
-                } else {
-                    alert('Αποτυχία επαλήθευσης σύνδεσης Google.');
-                    // Optional: Sign out user via Google if verification failed
-                    // google.accounts.id.revoke(response.credential, done => { console.log('Sign out after verification failure:', done); });
-                }
-            })
-            .catch(error => {
-                console.error('Error sending token to backend:', error);
-                alert('Σφάλμα επικοινωνίας με τον server για επαλήθευση.');
-                 // Optional: Sign out user via Google
-                // google.accounts.id.revoke(response.credential, done => { console.log('Sign out after communication error:', done); });
-            });
-            */
-
-            // Για απλότητα σε αυτό το παράδειγμα, απλώς ενημερώνουμε το UI
-            document.getElementById('auth-status').innerText = 'Συνδεδεμένος με Google.';
-            document.getElementById('google-signin-button').style.display = 'none';
-            document.getElementById('google-signout-button').classList.remove('hidden');
-        }
-
-        // Function to handle Google Sign-out
-        function handleSignOut() {
-             // TODO: In a production app, you should also invalidate the session on your backend.
-             console.log('User initiated sign out.');
-
-             // Using Google's client-side revoke (clears Google's session)
-             google.accounts.id.revoke(GOOGLE_CLIENT_ID, done => {
-                 console.log('Google client-side revoke result:', done);
-                 // Update UI after successful client-side sign-out/revoke
-                 document.getElementById('auth-status').innerText = 'Παρακαλώ συνδεθείτε.';
-                 document.getElementById('google-signin-button').style.display = 'block'; // Or whatever display style it needs
-                 document.getElementById('google-signout-button').classList.add('hidden');
-
-                 // TODO: Call your backend to clear server-side session data
-                 /*
-                 fetch(`${BACKEND_URL}/api/logout`, { method: 'POST' })
-                 .then(response => response.json())
-                 .then(data => console.log('Backend logout response:', data))
-                 .catch(error => console.error('Error calling backend logout:', error));
-                 */
-             });
-        }
-
-
-        // Initialize Google Identity Services and render button when the window loads
-        window.onload = function () {
-            google.accounts.id.initialize({
-                client_id: GOOGLE_CLIENT_ID,
-                callback: handleCredentialResponse, // Function to call after sign-in
-                // auto_select: true // Optional: Automatically sign in if only one Google account
-            });
-
-            // Render the Google Sign-in button inside the specified div
-             google.accounts.id.renderButton(
-                document.getElementById("google-signin-button"),
-                { theme: "outline", size: "large", text: "signin_with" }  // Customization options
-            );
-
-            // Optional: Display One Tap prompt
-            // google.accounts.id.prompt();
-
-            // Add event listener for the sign-out button
-            document.getElementById('google-signout-button').addEventListener('click', handleSignOut);
-        };
-
-
-        // Function to initiate Viva Wallet payment by calling our backend
-        document.getElementById('viva-wallet-payment-button').addEventListener('click', async function() {
-            const button = this;
-            const loadingSpinner = document.getElementById('payment-loading');
-
-            button.disabled = true;
-            //button.innerText = 'Εκκίνηση...'; // Could change button text or use spinner
-            loadingSpinner.style.display = 'block'; // Show spinner
-
-            // **Παράδειγμα** στοιχείων πληρωμής - αυτά θα προέρχονταν από την εφαρμογή σου (π.χ. από το καλάθι αγορών)
-            const paymentDetails = {
-                amount: 15.75, // Ποσό σε EUR (π.χ. 15.75€) - Ο backend θα το μετατρέψει σε λεπτά
-                description: 'Προϊόντα από την εφαρμογή μου' // Περιγραφή της συναλλαγής
-            };
-
-            try {
-                // Καλέστε το backend endpoint
-                const response = await fetch(`${BACKEND_URL}/create-payment-order`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(paymentDetails),
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    // Αν το backend επέστρεψε επιτυχία, ανακατευθύνετε
-                    if (data.paymentUrl) {
-                        console.log('Received payment URL, redirecting:', data.paymentUrl);
-                        window.location.href = data.paymentUrl; // Ανακατεύθυνση στη σελίδα πληρωμής της Viva Wallet
-                    } else {
-                         console.error('Backend response missing paymentUrl');
-                         alert('Σφάλμα: Δεν λάβαμε URL πληρωμής από τον server.');
-                         button.disabled = false;
-                         loadingSpinner.style.display = 'none';
-                         //button.innerText = 'Πληρωμή μέσω Viva Wallet';
-                    }
-
-                } else {
-                    // Αν το backend επέστρεψε σφάλμα
-                    console.error('Backend error:', data.error);
-                    alert(`Σφάλμα κατά την εκκίνηση πληρωμής: ${data.details || data.error || 'Άγνωστο σφάλμα'}`);
-                    button.disabled = false;
-                    loadingSpinner.style.display = 'none';
-                    //button.innerText = 'Πληρωμή μέσω Viva Wallet';
-                }
-
-            } catch (error) {
-                // Αν υπήρξε σφάλμα στην κλήση του backend (π.χ. ο server δεν τρέχει)
-                console.error('Error calling backend:', error);
-                alert('Αδυναμία επικοινωνίας με τον server. Βεβαιωθείτε ότι το backend τρέχει.');
-                button.disabled = false;
-                loadingSpinner.style.display = 'none';
-                //button.innerText = 'Πληρωμή μέσω Viva Wallet';
-            }
-        });
-
-    </script>
-
-    </body>
+    <script src="script.js"></script>
+</body>
 </html>
