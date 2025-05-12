@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device, initial-scale=1.0">
     <title>Εφαρμογή μου</title>
     <style>
-        body {
+        /* Your CSS styles here */
+         body {
             font-family: sans-serif;
             display: flex;
             flex-direction: column;
@@ -69,7 +70,8 @@
             <p>Παρακαλώ συνδεθείτε.</p>
         </div>
 
-        <button id="google-signin-button">Σύνδεση με Google</button>
+        <div id="google-signin-button"></div>
+
         <button id="google-signout-button" class="hidden">Αποσύνδεση από Google</button>
 
         <hr style="margin: 30px 0;">
@@ -77,23 +79,22 @@
         <button id="viva-wallet-payment-button">Πληρωμή μέσω Viva Wallet</button>
     </div>
 
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <script>
         // Replace with your actual Google Client ID
-        const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID';
+        const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID'; // ΒΑΛΕ ΤΟ ΔΙΚΟ ΣΟΥ CLIENT ID ΕΔΩ
 
-        // Function to handle Google Sign-in
+        // Function to handle Google Sign-in (called by the GSI library)
         function handleCredentialResponse(response) {
-            // This function is called after successful sign-in.
-            // The 'response.credential' contains the ID token.
-            // You MUST send this token to your backend for verification.
             console.log("Google ID Token:", response.credential);
 
             // TODO: Send the token to your backend for verification and user session management.
             // Example: fetch('/api/verify-google-token', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: response.credential }) });
 
             document.getElementById('auth-status').innerText = 'Συνδεδεμένος με Google.';
-            document.getElementById('google-signin-button').classList.add('hidden');
+             // Hide the Google Sign-in button/div after successful login
+            document.getElementById('google-signin-button').style.display = 'none';
             document.getElementById('google-signout-button').classList.remove('hidden');
         }
 
@@ -103,23 +104,31 @@
              console.log('User signed out.');
 
              document.getElementById('auth-status').innerText = 'Παρακαλώ συνδεθείτε.';
-             document.getElementById('google-signin-button').classList.remove('hidden');
+             // Show the Google Sign-in button/div
+             document.getElementById('google-signin-button').style.display = 'block'; // Or whatever display style it needs
              document.getElementById('google-signout-button').classList.add('hidden');
 
              // You might need additional steps here depending on how you manage sessions.
+             // If using Google's own sign-out:
+             // google.accounts.id.disableAutoSelect(); // If you used autoSelect
         }
 
-        // Render the Google Sign-in button
-        // This uses the newer Identity Services library.
+
+        // Initialize Google Identity Services when the window loads
         window.onload = function () {
             google.accounts.id.initialize({
                 client_id: GOOGLE_CLIENT_ID,
                 callback: handleCredentialResponse // Function to call after sign-in
             });
+
+            // Render the Google Sign-in button inside the specified div
              google.accounts.id.renderButton(
                 document.getElementById("google-signin-button"),
                 { theme: "outline", size: "large", text: "signin_with" }  // Customization options
             );
+
+            // You can also optionally use One Tap prompt:
+            // google.accounts.id.prompt();
 
             // Add event listener for the sign-out button
             document.getElementById('google-signout-button').addEventListener('click', handleSignOut);
@@ -142,5 +151,6 @@
         });
 
     </script>
-</body>
+
+     </body>
 </html>
