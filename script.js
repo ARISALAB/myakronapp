@@ -131,7 +131,7 @@ googleSignInButton.addEventListener('click', () => {
 });
 
 // GitHub Sign In button click handler
-githubSignInButton.addEventListener('click', ()(() => {
+githubSignInButton.addEventListener('click', () => {
     const provider = new firebase.auth.GithubAuthProvider();
     // Προαιρετικά: Πρόσθετα scopes αν τα χρειάζεσαι
     // provider.addScope('read:user'); // Για να διαβάσεις δημόσια στοιχεία χρήστη GitHub
