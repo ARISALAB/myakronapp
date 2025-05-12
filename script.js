@@ -367,7 +367,7 @@ vivaPaymentButton.addEventListener('click', () => {
 
             // Κάνουμε fetch request στο δικό σου backend endpoint
             // ΑΝΤΙΚΑΤΑΣΤΗΣΕ ΤΟ '/api/create-viva-order' με το URL του δικού σου backend endpoint
-            const response = await fetch('/api/create-viva-order', {
+const response = await fetch('/.netlify/functions/create-viva-order', { // <--- Αλλαγή εδώ
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
