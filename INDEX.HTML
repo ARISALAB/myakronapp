@@ -190,7 +190,12 @@
 </head>
 <body>
     <header>
-        <h1>Οικονομική Διαχείριση Εστιατορίου</h1>
+       <h1>Οικονομική Διαχείριση Εστιατορίου</h1>
+    <div style="float: right; margin-top: -40px;">
+        <span id="user-greeting" style="margin-right: 10px;"></span>
+        <button id="login-btn">Σύνδεση με Google</button>
+        <button id="logout-btn" style="display:none;">Αποσύνδεση</button>
+    </div>
     </header>
 
     <nav>
@@ -318,37 +323,71 @@
 
 
     </main>
- <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import {
-    getAuth,
-    signInWithPopup,
-    GoogleAuthProvider,
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+  onAuthStateChanged,
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCQZMLh_gaiLWEtMw6VeDVXdkuNW64HgOE",
-    authDomain: "restaurantfinanceapp.firebaseapp.com",
-    projectId: "restaurantfinanceapp",
-    storageBucket: "restaurantfinanceapp.appspot.com",
-    messagingSenderId: "838820261500",
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyCQZMLh_gaiLWEtMw6VeDVXdkuNW64HgOE",
+  authDomain: "restaurantfinanceapp.firebaseapp.com",
+  projectId: "restaurantfinanceapp",
+  storageBucket: "restaurantfinanceapp.appspot.com",
+  messagingSenderId: "838820261500",
+};
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-  document.getElementById("login-btn").addEventListener("click", () => {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const user = result.user;
-        console.log("Συνδεδεμένος χρήστης:", user.displayName);
-        // π.χ. window.location.href = "/dashboard.html";
-      })
-      .catch((error) => {
-        console.error("Σφάλμα σύνδεσης:", error);
-      });
-  });
+const loginBtn = document.getElementById("login-btn");
+const logoutBtn = document.getElementById("logout-btn");
+const userGreeting = document.getElementById("user-greeting");
+
+// Αν ο χρήστης είναι ήδη συνδεδεμένος (θυμάται)
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    userGreeting.textContent = `Καλώς ήρθες, ${user.displayName}!`;
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "inline-block";
+  } else {
+    userGreeting.textContent = "";
+    loginBtn.style.display = "inline-block";
+    logoutBtn.style.display = "none";
+  }
+});
+
+// Σύνδεση
+loginBtn.addEventListener("click", () => {
+  signInWithPopup(auth, provider)
+    .then((result) => {
+      const user = result.user;
+      userGreeting.textContent = `Καλώς ήρθες, ${user.displayName}!`;
+      loginBtn.style.display = "none";
+      logoutBtn.style.display = "inline-block";
+    })
+    .catch((error) => {
+      console.error("Σφάλμα σύνδεσης:", error);
+    });
+});
+
+// Αποσύνδεση
+logoutBtn.addEventListener("click", () => {
+  signOut(auth)
+    .then(() => {
+      userGreeting.textContent = "";
+      loginBtn.style.display = "inline-block";
+      logoutBtn.style.display = "none";
+    })
+    .catch((error) => {
+      console.error("Σφάλμα αποσύνδεσης:", error);
+    });
+});
 </script>
 
     
