@@ -103,7 +103,7 @@
       try {
         const idToken = await user.getIdToken(); // ΠΡΟΣΘΗΚΗ για ασφάλεια backend
 
-        const res = await fetch('/netlify/functions/createVivaOrder', {
+        const res = await fetch('/.netlify/functions/createVivaOrder', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
