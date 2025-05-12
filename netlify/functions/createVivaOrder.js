@@ -1,73 +1,77 @@
 const fetch = require('node-fetch');
+const admin = require('firebase-admin');
 
-exports.handler = async (event, context) => {
-  // Only accept POST requests
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: "Method not allowed" }),
-    };
+// Viva Wallet config
+const VIVA_API_KEY = '+jjNx2'; // Βάλε εδώ το δικό σου API Key
+const VIVA_MERCHANT_ID = '64e2f74e-d8f5-4d90-be5c-1f805fb1e41e';
+const VIVA_ENV = 'https://www.vivapayments.com'; // ή 'https://demo.vivapayments.com' για δοκιμές
+
+// Firebase Admin Init
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.applicationDefault(),
+  });
+}
+
+exports.handler = async function (event, context) {
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  // Get user data from frontend (optional)
-  const { email = "customer@example.com", fullName = "Customer" } = JSON.parse(event.body);
-
-  const merchantId = "64e2f74e-d8f5-4d90-be5c-1f805fb1e41e";
-  const apiKey = "+jjNx2";
-  const sourceCode = "1234"; // ✅ Βεβαιώσου ότι υπάρχει στο Viva Dashboard
-
-  const amount = 500; // Amount in cents => 5.00€
-
-  const orderData = {
-    amount: amount,
-    customerTrns: "Πρόσβαση στην εφαρμογή",
-    customer: {
-      email: email,
-      fullName: fullName,
-      phone: "+306900000000",
-      countryCode: "GR",
-      requestLang: "el-GR"
-    },
-    sourceCode: sourceCode,
-    paymentTimeout: 300,
-    disableWallet: false,
-    disableCash: true,
-    merchantTrns: "Πρόσβαση στην εφαρμογή RestaurantFinanceApp",
-    preauth: false,
-    allowRecurring: false
-  };
-
   try {
-    const response = await fetch("https://demo.vivapayments.com/api/orders", {
-      method: "POST",
-      headers: {
-        "Authorization": "Basic " + Buffer.from(`${merchantId}:${apiKey}`).toString("base64"),
-        "Content-Type": "application/json",
+    const body = JSON.parse(event.body);
+
+    // 1. Επαλήθευση Firebase ID Token
+    const authHeader = event.headers.authorization || '';
+    const idToken = authHeader.replace('Bearer ', '');
+
+    if (!idToken) {
+      return { statusCode: 401, body: 'Missing ID token' };
+    }
+
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const email = decodedToken.email;
+    const fullName = body.fullName || decodedToken.name || 'Χρήστης';
+
+    // 2. Δημιουργία Viva Order
+    const orderRequest = {
+      amount: 500, // σε λεπτά του ευρώ (π.χ. 500 = 5€)
+      customer: {
+        email: email,
+        fullName: fullName
       },
-      body: JSON.stringify(orderData),
+      merchantTrns: 'Συνδρομή Εφαρμογής',
+      sourceCode: 'Default',
+    };
+
+    const response = await fetch(`${VIVA_ENV}/api/orders`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic ' + Buffer.from(`${VIVA_MERCHANT_ID}:${VIVA_API_KEY}`).toString('base64'),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(orderRequest)
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      return {
-        statusCode: response.status,
-        body: JSON.stringify({ error: "Viva API error", details: errorText }),
-      };
+      const err = await response.text();
+      return { statusCode: 500, body: `Viva API Error: ${err}` };
     }
 
-    const result = await response.json();
-    const orderCode = result.orderCode;
+    const orderData = await response.json();
 
-    const checkoutUrl = `https://demo.vivapayments.com/web/checkout?ref=${orderCode}`;
+    // 3. Επιστροφή Checkout URL
+    const checkoutUrl = `${VIVA_ENV}/web/checkout?ref=${orderData.orderCode}`;
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ checkoutUrl }),
+      body: JSON.stringify({ checkoutUrl })
     };
+
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Internal server error", details: error.message }),
+      body: `Server error: ${error.message}`
     };
   }
 };
