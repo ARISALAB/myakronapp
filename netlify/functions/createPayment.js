@@ -41,7 +41,11 @@ const accountsUrl = process.env.NODE_ENV === 'production'
 // Οι URL στις οποίες η Viva Wallet θα ανακατευθύνει τον χρήστη ή θα στείλει ειδοποίηση.
 // ΑΝΤΙΚΑΤΑΣΤΗΣΕ ΤΟ 'YOUR_APP_DOMAIN' με το πραγματικό domain της εφαρμογής σου στο Netlify!
 // Π.χ. 'https://myakronapp.netlify.app'
-const successUrl = `https://YOUR_APP_DOMAIN/?payment_status=success`; // Ανακατεύθυνση πίσω στην αρχική σελίδα με success status
+const appDomain = process.env.VIVA_SUCCESS_DOMAIN || 'https://myakronapp.netlify.app';
+
+const successUrl = `${appDomain}/?payment_status=success`;
+const failureUrl = `${appDomain}/?payment_status=failed`;
+const sourceUrl = `${appDomain}/.netlify/functions/paymentWebhook`;
 const failureUrl = `https://YOUR_APP_DOMAIN/?payment_status=failed`; // Ανακατεύθυνση πίσω στην αρχική σελίδα με failed status
 const sourceUrl = `https://YOUR_APP_DOMAIN/.netlify/functions/paymentWebhook`; // Server-to-server notification (ΠΟΛΥ ΣΗΜΑΝΤΙΚΟ ΓΙΑ ΤΗΝ ΑΣΦΑΛΕΙΑ)
 
