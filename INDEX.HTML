@@ -3,94 +3,85 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login Demo</title>
-  <script type="module">
-    // Εισαγωγή Firebase SDK
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getAuth,
-      signInWithPopup,
-      GoogleAuthProvider,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  <title>Οικονομική Διαχείριση Εστιατορίου</title>
 
-    // Ρυθμίσεις Firebase project
-    const firebaseConfig = {
-      apiKey: "AIzaSyApv3Fe8m66rW1eSW_VboC1LuKihz1Ov-U",
-      authDomain: "myakronapp.firebaseapp.com",
-      projectId: "myakronapp",
-      appId: "1:838820261500:web:7143d9d2f04c160fcd89c7"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-
-    // Κουμπί Login
-    document.getElementById("loginBtn").addEventListener("click", () => {
-      signInWithPopup(auth, provider)
-        .then(result => {
-          const user = result.user;
-          console.log("Login:", user);
-        })
-        .catch(error => {
-          console.error("Σφάλμα login:", error);
-        });
-    });
-
-    // Κουμπί Logout
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      signOut(auth).then(() => {
-        console.log("Αποσυνδέθηκε.");
-      });
-    });
-
-    // Παρακολούθηση αλλαγών authentication
-    onAuthStateChanged(auth, user => {
-      const userInfo = document.getElementById("userInfo");
-      if (user) {
-        userInfo.innerHTML = `
-          <p><strong>Συνδεδεμένος ως:</strong> ${user.displayName}</p>
-          <img src="${user.photoURL}" width="100" alt="User Image"/>
-          <p>${user.email}</p>
-        `;
-        document.getElementById("loginBtn").style.display = "none";
-        document.getElementById("logoutBtn").style.display = "inline-block";
-      } else {
-        userInfo.innerHTML = "<p>Δεν είστε συνδεδεμένος.</p>";
-        document.getElementById("loginBtn").style.display = "inline-block";
-        document.getElementById("logoutBtn").style.display = "none";
-      }
-    });
-  </script>
+  <!-- Firebase App SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <!-- Firebase Auth SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 
   <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 2rem;
-      background: #f4f4f4;
+    body { font-family: sans-serif; text-align: center; padding: 2rem; background: #f4f4f4; }
+    header { position: relative; padding-bottom: 2rem; }
+    #user-greeting { position: absolute; top: 0; right: 180px; }
+    #login-btn, #logout-btn {
+      padding: 0.5rem 1rem; margin: 0.5rem;
+      border: none; border-radius: 5px; cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
-    button {
-      padding: 1rem 2rem;
-      font-size: 1rem;
-      margin: 1rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    #loginBtn { background-color: #4285F4; color: white; }
-    #logoutBtn { background-color: #db4437; color: white; }
+    #login-btn { background: #4285F4; color: white; }
+    #logout-btn { background: #DB4437; color: white; display: none; }
   </style>
 </head>
 <body>
-  <h1>Καλωσήρθες στην Εφαρμογή</h1>
-  <div id="userInfo">
-    <p>Δεν είστε συνδεδεμένος.</p>
-  </div>
-  <button id="loginBtn">Σύνδεση με Google</button>
-  <button id="logoutBtn" style="display: none;">Αποσύνδεση</button>
+
+  <header>
+    <h1>Οικονομική Διαχείριση Εστιατορίου</h1>
+    <span id="user-greeting"></span>
+    <button id="login-btn">Σύνδεση με Google</button>
+    <button id="logout-btn">Αποσύνδεση</button>
+  </header>
+
+  <main>
+    <p>Περιεχόμενο της εφαρμογής εδώ…</p>
+  </main>
+
+  <footer>
+    <p>&copy; 2023 Η Εφαρμογή μου</p>
+  </footer>
+
+  <script>
+    // **ΣΩΣΤΟ firebaseConfig** από το Firebase Console → Project Settings → General → Your apps
+    const firebaseConfig = {
+      apiKey: "AIzaSyCQZMLh_gaiLWEtMw6VeDVXdkuNW64HgOE",
+      authDomain: "restaurantfinanceapp.firebaseapp.com",
+      projectId: "restaurantfinanceapp",
+      storageBucket: "restaurantfinanceapp.appspot.com",
+      messagingSenderId: "838820261500",
+      appId: "1:838820261500:web:3582c04f2d678af088e3f9"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    const loginBtn = document.getElementById("login-btn");
+    const logoutBtn = document.getElementById("logout-btn");
+    const userGreeting = document.getElementById("user-greeting");
+
+    // Παρακολούθηση κατάστασης σύνδεσης
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        userGreeting.textContent = `Καλώς ήρθες, ${user.displayName}!`;
+        loginBtn.style.display = "none";
+        logoutBtn.style.display = "inline-block";
+      } else {
+        userGreeting.textContent = "";
+        loginBtn.style.display = "inline-block";
+        logoutBtn.style.display = "none";
+      }
+    });
+
+    // Login
+    loginBtn.addEventListener("click", () => {
+      auth.signInWithPopup(provider).catch(err => console.error("Σφάλμα login:", err));
+    });
+
+    // Logout
+    logoutBtn.addEventListener("click", () => {
+      auth.signOut().catch(err => console.error("Σφάλμα logout:", err));
+    });
+  </script>
+
 </body>
 </html>
