@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="el">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Σύνδεση & Πληρωμή</title>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <style>
     body {
       font-family: sans-serif;
@@ -61,6 +65,7 @@
     const userInfo = document.getElementById('user-info');
     const userEmail = document.getElementById('user-email');
 
+    // Google login
     loginBtn.onclick = () => {
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider)
@@ -75,6 +80,7 @@
         });
     };
 
+    // Logout
     logoutBtn.onclick = () => {
       auth.signOut().then(() => {
         userInfo.style.display = 'none';
@@ -82,37 +88,48 @@
       });
     };
 
-   payBtn.onclick = async () => {
-  if (!auth.currentUser) {
-    alert("Παρακαλώ συνδεθείτε πρώτα.");
-    return;
-  }
+    // Viva Wallet Payment
+    payBtn.onclick = async () => {
+      const user = auth.currentUser;
 
-  const idToken = await auth.currentUser.getIdToken();
-
-  fetch('/.netlify/functions/createVivaOrder', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + idToken
-    },
-    body: JSON.stringify({
-      email: auth.currentUser.email,
-      fullName: auth.currentUser.displayName
-    })
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-      } else {
-        alert("Σφάλμα στη δημιουργία πληρωμής");
+      if (!user) {
+        alert("Παρακαλώ συνδεθείτε πρώτα.");
+        return;
       }
-    });
-};
 
-     
-    // Αυτόματη επαναφορά χρήστη
+      payBtn.disabled = true;
+      payBtn.textContent = "Γίνεται ανακατεύθυνση...";
+
+      try {
+        const idToken = await user.getIdToken(); // ΠΡΟΣΘΗΚΗ για ασφάλεια backend
+
+        const res = await fetch('/netlify/functions/createVivaOrder', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}` // Προώθηση token για έλεγχο ταυτότητας backend
+          },
+          body: JSON.stringify({
+            email: user.email,
+            fullName: user.displayName
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.checkoutUrl) {
+          window.location.href = data.checkoutUrl;
+        } else {
+          throw new Error("Δεν επιστράφηκε URL");
+        }
+      } catch (error) {
+        alert("Σφάλμα στη δημιουργία πληρωμής: " + error.message);
+        payBtn.disabled = false;
+        payBtn.textContent = "Πληρωμή με Viva Wallet";
+      }
+    };
+
+    // Αν ο χρήστης είναι ήδη συνδεδεμένος
     auth.onAuthStateChanged(user => {
       if (user) {
         userEmail.textContent = "Συνδεδεμένος ως: " + user.email;
