@@ -6,8 +6,8 @@ const VIVA_CLIENT_ID = process.env.VIVA_CLIENT_ID;
 const VIVA_CLIENT_SECRET = process.env.VIVA_CLIENT_SECRET;
 
 // Βασικά URLs για το Viva Wallet API (DEMO περιβάλλον)
-const VIVA_TOKEN_URL = 'https://demoaccounts.vivapayments.com/connect/token'; // <-- URL για έκδοση token σε DEMO
-const VIVA_ORDERS_URL = 'https://demoapi.vivapayments.com/checkout/v2/orders'; // <-- URL για δημιουργία παραγγελίας σε DEMO
+const VIVA_TOKEN_URL = 'https://demo.vivapayments.com/connect/token';
+const VIVA_ORDERS_URL = 'https://demo-api.vivapayments.com/checkout/v2/orders';
 
 // Βάλε το σωστό URL βάση του περιβάλλοντος σου (DEMO Frontend Checkout Page)
 const VIVA_CHECKOUT_BASE_URL = 'https://demo.vivapayments.com/web/checkout/'; // <-- URL της σελίδας πληρωμής σε DEMO
