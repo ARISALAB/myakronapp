@@ -12,11 +12,14 @@
     <div class="container">
         <h1>Καλώς ορίσατε!</h1>
 
-        <div id="auth-section">
-            <p>Παρακαλώ συνδεθείτε με τον λογαριασμό σας Google.</p>
+       <div id="auth-section">
+            <p id="auth-message">Παρακαλώ συνδεθείτε με τον λογαριασμό σας Google.</p>
             <button id="google-signin-button">Σύνδεση με Google</button>
-            <div id="auth-status"></div>
-        </div>
+            <div id="user-info" class="hidden">
+                <img id="user-photo" src="" alt="Φωτογραφία χρήστη">
+                <span id="user-name"></span>
+            </div>
+            <div id="auth-status"></div> </div>
      <div id="payment-section" class="hidden">
             <p>Για να αποκτήσετε πρόσβαση στην εφαρμογή, απαιτείται πληρωμή.</p>
             <button id="viva-payment-button">Πληρωμή μέσω Viva Wallet</button>
