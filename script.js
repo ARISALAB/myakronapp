@@ -1,4 +1,5 @@
-// Η δική σου ρύθμιση Firebase
+// --- Firebase Configuration ---
+// Η δική σου ρύθμιση Firebase (αντικατάστησε αν είναι διαφορετική)
 const firebaseConfig = {
     apiKey: "AIzaSyCQZMLh_gaiLWEtMw6VeDVXdkuNW64HgOE",
     authDomain: "restaurantfinanceapp.firebaseapp.com",
@@ -12,19 +13,29 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-// const analytics = firebase.analytics(); // Μπορείς να το χρησιμοποιήσεις αν χρειάζεσαι analytics
-// const db = firebase.firestore(); // Αν χρησιμοποιείς Firestore για κατάσταση πληρωμής
+// Αν χρησιμοποιείς Firestore για κατάσταση πληρωμής, κάνε uncomment την επόμενη γραμμή
+// const db = firebase.firestore();
+// Αν χρησιμοποιείς Analytics, κάνε uncomment την επόμενη γραμμή
+// const analytics = firebase.analytics();
 
-// Get references to DOM elements
+// --- Get References to DOM Elements ---
 const authSection = document.getElementById('auth-section');
 const paymentSection = document.getElementById('payment-section');
 const appSection = document.getElementById('app-section');
+
+const authMessage = document.getElementById('auth-message'); // Μήνυμα "Παρακαλώ συνδεθείτε"
 const googleSignInButton = document.getElementById('google-signin-button');
+
+const userInfoDiv = document.getElementById('user-info'); // Container για info χρήστη
+const userPhotoImg = document.getElementById('user-photo'); // Φωτογραφία χρήστη
+const userNameSpan = document.getElementById('user-name'); // Όνομα χρήστη
+
 const vivaPaymentButton = document.getElementById('viva-payment-button');
-const signoutButton = document.getElementById('signout-button'); // Στην payment section
-const signoutButtonApp = document.getElementById('signout-button-app'); // Στην app section
-const authStatusDiv = document.getElementById('auth-status');
-const paymentStatusDiv = document.getElementById('payment-status');
+const signoutButton = document.getElementById('signout-button'); // Κουμπί αποσύνδεσης στην payment section
+const signoutButtonApp = document.getElementById('signout-button-app'); // Κουμπί αποσύνδεσης στην app section
+
+const authStatusDiv = document.getElementById('auth-status'); // Για προσωρινά μηνύματα σύνδεσης
+const paymentStatusDiv = document.getElementById('payment-status'); // Για μηνύματα πληρωμής
 
 // --- Firebase Authentication ---
 
@@ -32,18 +43,45 @@ const paymentStatusDiv = document.getElementById('payment-status');
 auth.onAuthStateChanged(user => {
     if (user) {
         // Ο χρήστης είναι συνδεδεμένος
-        authStatusDiv.textContent = `Καλώς ορίσατε, ${user.displayName || user.email}!`;
-        authSection.classList.add('hidden'); // Κρύψε την ενότητα σύνδεσης
+        console.log('User is signed in:', user.uid);
 
-        // Έλεγχος κατάστασης πληρωμής (Αυτό πρέπει να γίνει με ασφαλή τρόπο, ιδανικά από backend)
-        checkPaymentStatus(user.uid); // Λειτουργία που θα υλοποιήσεις
+        // Εμφάνιση πληροφοριών χρήστη
+        // Χρησιμοποιούμε κενό string αν δεν υπάρχει photoURL για να μην εμφανίζεται σπασμένη εικόνα
+        userPhotoImg.src = user.photoURL || '';
+        // Εμφάνιση ονόματος ή email αν δεν υπάρχει displayName
+        userNameSpan.textContent = user.displayName || user.email || 'Χρήστης';
+
+        // Εμφάνιση της ενότητας πληροφοριών χρήστη
+        userInfoDiv.classList.remove('hidden');
+
+        // Κρύψε τα στοιχεία της ενότητας σύνδεσης
+        authMessage.classList.add('hidden');
+        googleSignInButton.classList.add('hidden');
+        authStatusDiv.textContent = ''; // Καθάρισε το auth-status μήνυμα
+
+        // Έλεγχος κατάστασης πληρωμής
+        // ΑΥΤΟ ΠΡΕΠΕΙ ΝΑ ΚΑΝΕΙ ΕΝΑΝ ΑΣΦΑΛΗ ΕΛΕΓΧΟ (ΙΔΑΝΙΚΑ ΣΕ BACKEND/DATABASE)
+        checkPaymentStatus(user.uid);
+
     } else {
         // Ο χρήστης είναι αποσυνδεδεμένος
-        authStatusDiv.textContent = 'Παρακαλώ συνδεθείτε.';
-        authSection.classList.remove('hidden'); // Εμφάνισε την ενότητα σύνδεσης
-        paymentSection.classList.add('hidden'); // Κρύψε τις άλλες ενότητες
+        console.log('User is signed out');
+
+        // Απόκρυψη πληροφοριών χρήστη
+        userInfoDiv.classList.add('hidden');
+        userPhotoImg.src = ''; // Καθάρισε την εικόνα
+        userNameSpan.textContent = ''; // Καθάρισε το όνομα
+
+        // Εμφάνιση των στοιχείων της ενότητας σύνδεσης
+        authMessage.classList.remove('hidden');
+        googleSignInButton.classList.remove('hidden');
+        authStatusDiv.textContent = 'Παρακαλώ συνδεθείτε.'; // Μήνυμα αποσύνδεσης
+
+        // Κρύψε τις ενότητες πληρωμής και εφαρμογής
+        paymentSection.classList.add('hidden');
         appSection.classList.add('hidden');
-        signoutButton.classList.add('hidden'); // Κρύψε και τα κουμπιά αποσύνδεσης
+        // Κρύψε και τα κουμπιά αποσύνδεσης
+        signoutButton.classList.add('hidden');
         signoutButtonApp.classList.add('hidden');
     }
 });
@@ -51,12 +89,17 @@ auth.onAuthStateChanged(user => {
 // Google Sign-In button click handler
 googleSignInButton.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    // provider.addScope('https://www.googleapis.com/auth/contacts.readonly'); // Προαιρετικά: Πρόσθετα scopes
+    // Προαιρετικά: Πρόσθετα scopes αν τα χρειάζεσαι
+    // provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
+
+    // Μπορείς να δείξεις ένα μήνυμα ενώ περιμένεις
+    authStatusDiv.textContent = 'Εκκίνηση σύνδεσης με Google...';
 
     auth.signInWithPopup(provider)
         .then((result) => {
-            // Η σύνδεση ήταν επιτυχής. Το user παρακολουθείται από το onAuthStateChanged listener.
-            console.log('Google Sign-In Successful', result.user);
+            // Η σύνδεση ήταν επιτυχής. Το user object είναι διαθέσιμο στο onAuthStateChanged listener.
+            console.log('Google Sign-In Successful');
+            // Το onAuthStateChanged θα αναλάβει να ενημερώσει το UI
         })
         .catch((error) => {
             // Χειρισμός σφαλμάτων.
@@ -64,53 +107,65 @@ googleSignInButton.addEventListener('click', () => {
             const errorMessage = error.message;
             console.error('Google Sign-In Error', errorCode, errorMessage);
             authStatusDiv.textContent = `Σφάλμα Σύνδεσης: ${errorMessage}`;
+            // Μπορεί να θέλεις να εμφανίσεις ξανά το κουμπί σύνδεσης αν αποτύχει
+            googleSignInButton.classList.remove('hidden');
+            authMessage.classList.remove('hidden'); // Επανεμφάνιση αρχικού μηνύματος
         });
 });
 
-// Sign-out button handlers
+// Sign-out button handler (στην payment section)
 signoutButton.addEventListener('click', () => {
     auth.signOut().then(() => {
         console.log('User Signed Out (from payment section)');
+        // Το onAuthStateChanged listener θα ενημερώσει το UI
     }).catch((error) => {
         console.error('Sign Out Error', error);
+        // Εμφάνισε μήνυμα σφάλματος αποσύνδεσης αν χρειάζεται
     });
 });
 
+// Sign-out button handler (στην app section)
 signoutButtonApp.addEventListener('click', () => {
     auth.signOut().then(() => {
         console.log('User Signed Out (from app section)');
+        // Το onAuthStateChanged listener θα ενημερώσει το UI
     }).catch((error) => {
         console.error('Sign Out Error', error);
+        // Εμφάνισε μήνυμα σφάλματος αποσύνδεσης αν χρειάζεται
     });
 });
 
-
 // --- Payment Logic (ΑΠΑΙΤΕΙ BACKEND ΓΙΑ ΑΣΦΑΛΕΙΑ) ---
 
-// Placeholder function to check payment status
-// ΑΥΤΟ ΠΡΕΠΕΙ ΝΑ ΕΛΕΓΧΕΙ ΑΣΦΑΛΩΣ ΑΠΟ BACKEND/DATABASE
+// Placeholder function to check payment status for a user
+// ΑΥΤΗ Η ΣΥΝΑΡΤΗΣΗ ΠΡΕΠΕΙ ΝΑ ΕΛΕΓΧΕΙ ΑΣΦΑΛΩΣ ΑΠΟ BACKEND/DATABASE
 function checkPaymentStatus(userId) {
     console.log(`Checking payment status for user: ${userId}`);
-    // Εδώ θα έκανες μια κλήση στο backend ή θα έλεγχες το Firestore/RTDB
-    // για να δεις αν ο χρήστης με αυτό το ID έχει πληρώσει.
 
     // --- ΠΑΡΑΔΕΙΓΜΑ: ΥΠΟΘΕΤΟΥΜΕ ΟΤΙ Ο ΧΡΗΣΤΗΣ ΔΕΝ ΕΧΕΙ ΠΛΗΡΩΣΕΙ ΑΚΟΜΑ ---
+    // ΑΥΤΟ ΠΡΕΠΕΙ ΝΑ ΑΛΛΑΞΕΙ! ΠΡΕΠΕΙ ΝΑ ΔΙΑΒΑΖΕΙΣ ΑΠΟ ΤΟ BACKEND/DATABASE.
     const hasPaid = false; // Αυτό πρέπει να είναι δυναμικό!
 
     if (hasPaid) {
         // Ο χρήστης έχει πληρώσει
+        console.log('User has paid. Displaying app section.');
         paymentSection.classList.add('hidden'); // Κρύψε την ενότητα πληρωμής
         appSection.classList.remove('hidden'); // Εμφάνισε την ενότητα εφαρμογής
         signoutButton.classList.add('hidden'); // Κρύψε το αποσύνδεση της payment section
         signoutButtonApp.classList.remove('hidden'); // Εμφάνισε το αποσύνδεση της app section
         paymentStatusDiv.textContent = ''; // Καθαρισε το μήνυμα πληρωμής
+
+        // Αν χρειάζεται να φορτώσεις επιπλέον πράγματα για την εφαρμογή:
+        // loadAppContent();
+
     } else {
         // Ο χρήστης ΔΕΝ έχει πληρώσει
+        console.log('User has not paid. Displaying payment section.');
         paymentSection.classList.remove('hidden'); // Εμφάνισε την ενότητα πληρωμής
         appSection.classList.add('hidden'); // Κρύψε την ενότητα εφαρμογής
         signoutButton.classList.remove('hidden'); // Εμφάνισε το αποσύνδεση της payment section
         signoutButtonApp.classList.add('hidden'); // Κρύψε το αποσύνδεση της app section
-        paymentStatusDiv.textContent = 'Απαιτείται πληρωμή.';
+        paymentStatusDiv.textContent = 'Για να αποκτήσετε πρόσβαση, απαιτείται πληρωμή.';
     }
 }
 
@@ -123,58 +178,73 @@ vivaPaymentButton.addEventListener('click', () => {
     paymentStatusDiv.textContent = 'Εκκίνηση πληρωμής...';
 
     // Ιδανικά, εδώ θα έκανες ένα fetch request σε ένα backend endpoint.
-    // π.χ. fetch('/api/create-viva-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: auth.currentUser.uid, amount: 10.00 }) })
-    // .then(response => response.json())
-    // .then(data => {
-    //     if (data.checkoutUrl) { // Υποθέτουμε ότι το backend σου επιστρέφει ένα URL πληρωμής
-    //         window.location.href = data.checkoutUrl; // Ανακατεύθυνση στο Viva Wallet
-    //         // Ή άνοιγμα σε νέο παράθυρο: window.open(data.checkoutUrl, '_blank');
-    //     } else {
-    //         paymentStatusDiv.textContent = 'Σφάλμα: Αδυναμία δημιουργίας παραγγελίας.';
-    //         console.error('Backend error creating Viva order', data);
-    //     }
-    // })
-    // .catch(error => {
-    //     paymentStatusDiv.textContent = 'Σφάλμα: Αδυναμία επικοινωνίας με το backend.';
-    //     console.error('Network or backend error', error);
-    // });
+    // Αυτό το endpoint θα δημιουργούσε την παραγγελία στο Viva Wallet και θα σου επέστρεφε το URL για ανακατεύθυνση.
+    /*
+    fetch('/api/create-viva-order', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            // Πρόσθεσε Firebase Auth token αν χρειάζεται το backend να επαληθεύσει τον χρήστη
+             'Authorization': 'Bearer ' + (auth.currentUser ? await auth.currentUser.getIdToken() : '')
+        },
+        body: JSON.stringify({
+            userId: auth.currentUser.uid, // Στέλνεις το User ID στο backend
+            amount: 10.00, // Το ποσό της πληρωμής
+            description: 'Πρόσβαση στην Εφαρμογή' // Περιγραφή
+            // Άλλες απαραίτητες πληροφορίες για την παραγγελία
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.checkoutUrl) { // Υποθέτουμε ότι το backend σου επιστρέφει ένα URL πληρωμής
+            console.log('Redirecting to Viva Wallet:', data.checkoutUrl);
+            window.location.href = data.checkoutUrl; // Ανακατεύθυνση στο Viva Wallet
+            // Μετά την πληρωμή, το Viva Wallet θα ανακατευθύνει τον χρήστη πίσω σε ένα URL που έχεις ορίσει.
+            // Σε αυτό το URL επιστροφής, ΠΡΕΠΕΙ να ελέγξεις την κατάσταση της πληρωμής με ασφάλεια (πάλι σε backend, μέσω Viva Wallet API ή webhook).
+        } else {
+            paymentStatusDiv.textContent = 'Σφάλμα: Αδυναμία δημιουργίας παραγγελίας πληρωμής.';
+            console.error('Backend error creating Viva order', data);
+        }
+    })
+    .catch(error => {
+        paymentStatusDiv.textContent = 'Σφάλμα: Αδυναμία επικοινωνίας για την πληρωμή.';
+        console.error('Fetch error:', error);
+    });
+    */
 
-    // --- Εναλλακτικά, ένα ΑΠΛΟ frontend-only παράδειγμα (ΜΗΝ ΤΟ ΧΡΗΣΙΜΟΠΟΙΗΣΕΙΣ ΣΕ ΠΑΡΑΓΩΓΗ) ---
-    // Αν υποθέσουμε ότι έχεις ένα test Checkout Form URL από το Viva Wallet
-    // const vivaCheckoutUrl = 'YOUR_VIVA_WALLET_CHECKOUT_URL'; // Βάλε το δικό σου URL
-    // if (vivaCheckoutUrl && vivaCheckoutUrl !== 'YOUR_VIVA_WALLET_CHECKOUT_URL') {
-    //      window.location.href = vivaCheckoutUrl;
-    //      // Μετά την πληρωμή, το Viva Wallet θα ανακατευθύνει τον χρήστη πίσω σε ένα URL που έχεις ορίσει
-    //      // Στο URL επιστροφής, πρέπει να ελέγξεις την κατάσταση της πληρωμής (Πάλι, ιδανικά σε backend)
-    // } else {
-    //     paymentStatusDiv.textContent = 'Η ενσωμάτωση Viva Wallet δεν έχει ρυθμιστεί πλήρως.';
-    //     console.warn('Viva Wallet Checkout URL not set.');
-    // }
-
-    // Για σκοπούς επίδειξης (πρέπει να αντικατασταθεί):
-    paymentStatusDiv.textContent = 'Συνδεθείτε με backend για πραγματική πληρωμή Viva Wallet.';
-    console.warn('Frontend payment initiation used. Implement backend for security!');
-    // Μετά από (υποτιθέμενη) επιτυχή πληρωμή:
-    // checkPaymentStatus(auth.currentUser.uid); // Κάλεσε ξανά για να δεις αν έχει πληρώσει
+    // --- Για σκοπούς επίδειξης (ΠΡΕΠΕΙ ΝΑ ΑΝΤΙΚΑΤΑΣΤΑΘΕΙ ΜΕ ΤΗΝ ΠΑΡΑΠΑΝΩ ΛΟΓΙΚΗ BACKEND ΚΛΗΣΗΣ) ---
+    paymentStatusDiv.textContent = 'Η πληρωμή μέσω Viva Wallet απαιτεί backend integration.';
+    console.warn('Viva Wallet payment initiated from frontend placeholder. Implement backend logic!');
+    // Μετά από μια (υποτιθέμενη) επιτυχή πληρωμή και **ασφαλή** επιβεβαίωση από το backend:
+    // checkPaymentStatus(auth.currentUser.uid); // Κάλεσε ξανά για να δεις αν έχει πληρώσει (αφού ενημερωθεί η κατάσταση στο backend/DB)
 });
 
-// --- Logic για την κατάσταση μετά την πληρωμή ---
-// Όταν η πληρωμή επιβεβαιωθεί (αυτό πρέπει να γίνει ΑΣΦΑΛΩΣ),
-// η συνάρτηση checkPaymentStatus θα καλεστεί από το onAuthStateChanged
-// και θα εμφανίσει την ενότητα app-section.
-// Αν χρειάζεσαι να φορτώσεις δυναμικά κάτι μετά την πληρωμή:
+// --- Application Content Logic (Προαιρετικό) ---
+// Αυτή η συνάρτηση μπορεί να καλεστεί όταν ο χρήστης έχει πληρώσει
 function loadAppContent() {
-    console.log('Loading application content...');
-    // Εδώ μπορείς να φορτώσεις επιπλέον scripts, να φέρεις δεδομένα, κλπ.
-    // π.χ. import('./my-app.js').then(module => module.initApp());
-    // appSection.innerHTML += '<p>Το περιεχόμενο της εφαρμογής φορτώθηκε.</p>'; // Προσθήκη περιεχομένου
+    console.log('Loading application specific content...');
+    // Εδώ μπορείς να φορτώσεις δυναμικά άλλα scripts, να φέρεις δεδομένα, να εμφανίσεις πολύπλοκο UI.
+    // π.χ. const appScript = document.createElement('script');
+    // appScript.src = 'path/to/your/main-app.js';
+    // document.body.appendChild(appScript);
+    // ή να αλλάξεις το innerHTML της appSection
+    // appSection.innerHTML = '<h2>Το περιεχόμενο της εφαρμογής σας!</h2><p>Δεδομένα...</p>';
 }
 
-// Call checkPaymentStatus initially if user is already logged in on page load
-if (auth.currentUser) {
-    checkPaymentStatus(auth.currentUser.uid);
-}
+// --- Initial Check ---
+// Το onAuthStateChanged listener καλείται αυτόματα κατά την φόρτωση της σελίδας
+// αν υπάρχει ήδη συνδεδεμένος χρήστης, οπότε ο παρακάτω κώδικας δεν είναι αυστηρά απαραίτητος
+// αλλά δεν βλάπτει.
 
-// Λόγω του onAuthStateChanged, η λογική checkPaymentStatus τρέχει
-// κάθε φορά που αλλάζει η κατάσταση σύνδεσης (συμπεριλαμβανομένου
-// της αρχικής φόρτωσης αν ο χρήστης είναι ήδη συνδεδεμένος).
+// const currentUser = auth.currentUser;
+// if (currentUser) {
+//     console.log('User already logged in on page load:', currentUser.uid);
+//     // checkPaymentStatus(currentUser.uid); // Το onAuthStateChanged θα το καλέσει ούτως ή άλλως
+// } else {
+//     console.log('No user logged in on page load.');
+// }
