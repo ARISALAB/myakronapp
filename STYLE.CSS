@@ -1,561 +1,81 @@
-/* Ορισμός μπλε χρωμάτων ως μεταβλητές */
-:root {
-    --primary-color: #007bff; /* Βασικό μπλε */
-    --secondary-color: #6c757d; /* Γκρι/Σκούρο μπλε */
-    --header-footer-bg: #0056b3; /* Σκούρο μπλε για header/footer */
-    --nav-bg: #004085; /* Ακόμα πιο σκούρο μπλε για navigation */
-    --button-bg: #007bff;
-    --button-hover-bg: #0056b3;
-    --table-header-bg: #007bff;
-    --table-header-color: #fff;
-    --table-row-alt-bg: #f2f2f2; /* Εναλλακτικό χρώμα γραμμής πίνακα */
-    --total-row-bg: #e9ecef; /* Χρώμα φόντου για τη γραμμή συνόλου */
-    --text-color: #343a40; /* Σκούρο γκρι για κείμενο */
-    --link-color: #007bff;
-    --link-hover-color: #0056b3;
-}
-
-
 body {
     font-family: sans-serif;
-    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
     margin: 0;
-    padding: 0;
-    background-color: #e9ecef; /* Ανοιχτό μπλε/γκρι */
-    color: var(--text-color);
-}
-
-header {
-    background: var(--header-footer-bg);
-    color: #fff;
-    padding: 1rem 0;
-    text-align: center;
-}
-
-nav {
-    background: var(--nav-bg);
-    color: #fff;
-    padding: 0.5rem 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Προσθήκη σκιάς */
-}
-
-nav ul {
-    padding: 0;
-    list-style: none;
-    text-align: center;
-}
-
-nav ul li {
-    display: inline;
-    margin: 0 15px; /* Λίγο μεγαλύτερο διάστημα */
-}
-
-nav ul li a {
-    color: #fff;
-    text-decoration: none;
-    font-weight: bold;
-    transition: color 0.3s ease; /* Ομαλή μετάβαση στο hover */
-}
-
-nav ul li a:hover {
-    color: #cccccc; /* Ανοιχτότερο χρώμα στο hover */
-}
-nav ul li.dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-nav ul li.dropdown:hover .dropdown-menu {
-    display: block;
-}
-
-nav ul li .dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: var(--nav-bg);
-    min-width: 200px;
-    text-align: left;
-    padding: 0;
-    margin: 0;
-    border-radius: 4px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-nav ul li .dropdown-menu li {
-    display: block;
-}
-
-nav ul li .dropdown-menu li a {
-    display: block;
-    padding: 10px;
-    color: #fff;
-    text-decoration: none;
-    font-weight: normal;
-}
-
-nav ul li .dropdown-menu li a:hover {
-    background-color: var(--button-hover-bg);
-}
-
-main {
     padding: 20px;
-    max-width: 1200px; /* Μεγαλύτερο μέγιστο πλάτος για τις 2 στήλες */
-    margin: 20px auto;
-    background: #fff;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    border-radius: 8px; /* Στρογγυλεμένες γωνίες */
 }
 
-/* CSS για τη διάταξη σε δύο στήλες */
-.split-layout {
-    display: flex; /* Χρήση Flexbox */
-    gap: 30px; /* Διάστημα μεταξύ των στηλών */
-    flex-wrap: wrap; /* Επιτρέπει το σπάσιμο σε μικρότερες οθόνες */
-}
-
-.left-column {
-    flex: 1; /* Επιτρέπει στην αριστερή στήλη να μεγαλώνει */
-    min-width: 300px; /* Ελάχιστο πλάτος για να μην συμπιέζεται πολύ */
-}
-
-.right-column {
-    flex: 2; /* Επιτρέπει στη δεξιά στήλη (πίνακας) να είναι μεγαλύτερη */
-    min-width: 400px; /* Ελάχιστο πλάτος για τον πίνακα */
-    overflow-x: auto; /* Προσθήκη scroll αν ο πίνακας είναι πολύ φαρδύς */
-}
-
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: var(--text-color);
-}
-
-.form-group input[type="text"],
-.form-group input[type="number"],
-.form-group input[type="date"] { /* Στυλ και για input type="date" */
+.container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 500px;
     width: 100%;
-    padding: 10px; /* Λίγο μεγαλύτερο padding */
-    border: 1px solid #ced4da; /* Χρώμα περιγράμματος */
-    box-sizing: border-box;
-    border-radius: 4px; /* Στρογγυλεμένες γωνίες στα input */
 }
 
-.total-section {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: var(--total-row-bg);
-    border: 1px dashed #adb5bd; /* Διακεκομμένο περίγραμμα */
-    text-align: center;
+h1, h2 {
+    color: #333;
     margin-bottom: 20px;
-    border-radius: 4px;
 }
 
-button[type="submit"] {
-    display: block; /* Κάνε το κουμπί block για να πιάνει όλο το πλάτος */
-    width: 100%; /* Πιάνει όλο το πλάτος του γονέα */
-    background: var(--button-bg);
-    color: #fff;
-    padding: 12px 20px; /* Μεγαλύτερο padding */
+button {
+    padding: 10px 20px;
+    margin: 10px 5px;
     border: none;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 1.1rem; /* Λίγο μεγαλύτερο μέγεθος γραμματοσειράς */
-    border-radius: 4px;
-    transition: background-color 0.3s ease; /* Ομαλή μετάβαση στο hover */
-}
-
-button[type="submit"]:hover {
-    background: var(--button-hover-bg);
-}
-/* ... (ο προηγούμενος κώδικας του style.css παραμένει) ... */
-
-/* CSS για τους πίνακες (Εσόδων, Εξόδων, Προμηθευτών) */
-#income-table,
-#expenses-table,
-#suppliers-table { /* Προσθέσαμε το suppliers-table */
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-#income-table th,
-#income-table td,
-#expenses-table th,
-#expenses-table td,
-#suppliers-table th, /* Προσθέσαμε το suppliers-table */
-#suppliers-table td { /* Προσθέσαμε το suppliers-table */
-    padding: 12px;
-    border: 1px solid #dee2e6;
-    text-align: left;
-}
-
-#income-table th,
-#expenses-table th,
-#suppliers-table th { /* Προσθέσαμε το suppliers-table */
-    background-color: var(--table-header-bg);
-    color: var(--table-header-color);
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-/* Στυλ για τις εναλλακτικές γραμμές στο σώμα των πινάκων */
-#income-table tbody tr:nth-child(even),
-#expenses-table tbody tr:nth-child(even),
-#suppliers-table tbody tr:nth-child(even) { /* Προσθέσαμε το suppliers-table */
-    background-color: var(--table-row-alt-bg);
-}
-
-/* Εφέ hover στις γραμμές των πινάκων */
-#income-table tbody tr:hover,
-#expenses-table tbody tr:hover,
-#suppliers-table tbody tr:hover { /* Προσθέσαμε το suppliers-table */
-    background-color: #e9ecef;
-    cursor: pointer;
-}
-
-/* Στυλ για το footer των πινάκων (γραμμή συνόλου) - Δεν υπάρχει footer στον πίνακα προμηθευτών, αλλά δεν πειράζει */
-#income-table tfoot td,
-#expenses-table tfoot td {
-    font-weight: bold;
-    background-color: var(--total-row-bg);
-    border-top: 2px solid #adb5bd;
-    padding: 12px;
-}
-
-/* Στυλ για τις ετικέτες "Σύνολο Ημέρας:" */
-#income-table tfoot td.total-row,
-#expenses-table tfoot td.total-row {
-    text-align: right;
-     padding-right: 20px;
-}
-
-/* Στυλ για τα ποσά συνόλου */
-#income-table tfoot td#daily-total-income,
-#expenses-table tfoot td#daily-total-expenses {
-     text-align: left;
-}
-
-/* Στυλ για τη λίστα προμηθευτών (προηγούμενο στυλ, δεν χρειάζεται πια αν χρησιμοποιούμε πίνακα) */
-/* #suppliers-list { ... } */
-
-/* Στυλ για το μήνυμα "Δεν βρέθηκαν" */
-#no-data-message, /* για έσοδα */
-#no-expense-data-message, /* για έξοδα */
-#no-suppliers-message { /* για προμηθευτές */
-    color: var(--secondary-color);
-    font-style: italic;
-    margin-top: 20px;
-}
-
-/* ... (ο υπόλοιπος κώδικας του style.css παραμένει) ... */
-/* Στυλ για το μήνυμα "Δεν βρέθηκαν καταχωρήσεις" */
-#no-data-message,
-#no-expense-data-message,
-#no-suppliers-message {
-    color: var(--secondary-color); /* Γκρι χρώμα */
-    font-style: italic;
-    margin-top: 20px;
-}
-
-
-footer {
-    text-align: center;
-    padding: 1rem 0;
-    background: var(--header-footer-bg);
-    color: #fff;
-    margin-top: 20px;
-}
-
-/* Media Query για μικρότερες οθόνες */
-@media (max-width: 768px) {
-    .split-layout {
-        flex-direction: column; /* Σε μικρές οθόνες, οι στήλες γίνονται γραμμές */
-        gap: 20px; /* Μικρότερο διάστημα */
-    }
-
-    .left-column,
-    .right-column {
-        min-width: unset; /* Αφαίρεση ελάχιστου πλάτους */
-        width: 100%; /* Παίρνουν όλο το πλάτος */
-    }
-
-     #income-table th,
-     #income-table td,
-     #expenses-table th,
-     #expenses-table td {
-         padding: 8px; /* Μικρότερο padding σε μικρές οθόνες */
-         font-size: 0.9em; /* Μικρότερο μέγεθος γραμματοσειράς */
-     }
-
-     nav ul li {
-         margin: 0 8px; /* Λιγότερο διάστημα μεταξύ συνδέσμων */
-     }
-}
-/* Media Query για μικρότερες οθόνες */
-@media (max-width: 768px) {
-    .split-layout {
-        flex-direction: column; /* Σε μικρές οθόνες, οι στήλες γίνονται γραμμές */
-        gap: 20px; /* Μικρότερο διάστημα */
-    }
-
-    .left-column,
-    .right-column {
-        min-width: unset; /* Αφαίρεση ελάχιστου πλάτους */
-        width: 100%; /* Παίρνουν όλο το πλάτος */
-    }
-}
-/* ... (ο προηγούμενος κώδικας του style.css παραμένει) ... */
-
-/* Ειδικά στυλ για τη σελίδα Αναφοράς */
-.report-controls {
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #ced4da; /* Διαχωριστική γραμμή */
-    text-align: center; /* Κεντράρισμα του date picker */
-}
-
-.report-layout {
-    /* Τα στυλ split-layout, left-column, right-column ήδη εφαρμόζονται */
-}
-
-#summary-table {
-    /* Τα γενικά στυλ πίνακα (#income-table, #expenses-table) ισχύουν */
-    margin-bottom: 20px; /* Διάστημα μετά τον πίνακα */
-}
-
-#summary-table td:first-child {
-    font-weight: bold; /* Έντονη γραφή για τις κατηγορίες */
-}
-
-/* Στυλ για το σύνολο στα bold */
-#summary-table tbody tr td:first-child b {
-    font-weight: bold; /* Βεβαιώνουμε ότι τα bold μέσα στα td είναι bold */
-}
-
-/* Στυλ για τη διαχωριστική γραμμή στον πίνακα */
-#summary-table hr {
-    border: none;
-    border-top: 1px dashed #adb5bd;
-    margin: 10px 0;
-}
-
-/* Στυλ για τα container των γραφημάτων */
-.chart-container {
-    display: flex; /* Χρήση flexbox για τακτοποίηση των γραφημάτων */
-    flex-direction: column; /* Τα γραφήματα το ένα κάτω από το άλλο */
-    align-items: center; /* Κεντράρισμα των γραφημάτων */
-}
-
-.chart-container h3 {
-    text-align: center;
-    margin-bottom: 15px;
-    color: var(--text-color);
-}
-
-/* ... (ο υπόλοιπος κώδικας του style.css παραμένει) /* ... (ο προηγούμενος κώδικας του style.css παραμένει) ... */
-/* ... (ο προηγούμενος κώδικας του style.css παραμένει) ... */
-
-/* Στυλ για το κουμπί εξαγωγής PDF */
-.export-button {
-    display: block; /* Παραμένει block για να μπορούμε να το κεντράρουμε */
-    /* width: 100%; */ /* Αφαιρούμε το 100% πλάτος */
-    max-width: 280px; /* Ορίζουμε ένα μέγιστο πλάτος (μπορείτε να το προσαρμόσετε) */
-    padding: 12px 20px;
-    font-size: 1.1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    text-align: center;
-    margin: 20px auto; /* Θέτουμε αυτόματα περιθώρια αριστερά/δεξιά για κεντράρισμα και διατηρούμε το 20px πάνω/κάτω */
-
-    /* Νέα Χρώματα - Σκούρο Μπλε */
-    background-color: var(--nav-bg);
-    color: #fff;
-    border: none;
+    font-size: 1rem;
     transition: background-color 0.3s ease;
 }
 
-.export-button:hover {
-     background-color: #002040;
+#google-signin-button {
+    background-color: #4285F4;
+    color: white;
 }
 
-/* ... (ο υπόλοιπος κώδικας του style.css παραμένει) ... */
-/* ... (ο προηγούμενος κώδικας του style.css παραμένει) ... */
-
-/* Στυλ για τα κουμπιά Επεξεργασία και Διαγραφή στον πίνακα */
-.action-buttons button {
-    padding: 4px 8px;
-    margin-right: 5px;
-    border: none;
-    cursor: pointer;
-    border-radius: 3px;
-    font-size: 0.9em;
-    transition: background-color 0.2s ease;
+#google-signin-button:hover {
+    background-color: #357ae8;
 }
 
-.edit-button {
-    background-color: #ffc107; /* Κίτρινο/Πορτοκαλί */
-    color: #212529; /* Σκούρο κείμενο */
+#viva-payment-button {
+    background-color: #00b0ff; /* Viva Wallet primary color */
+    color: white;
 }
 
-.edit-button:hover {
-    background-color: #e0a800;
+#viva-payment-button:hover {
+    background-color: #0099e6;
 }
 
-.delete-button {
-    background-color: #dc3545; /* Κόκκινο */
-    color: #fff;
+#signout-button, #signout-button-app {
+    background-color: #d9534f;
+    color: white;
 }
 
-.delete-button:hover {
-    background-color: #c82333;
-}
-
-/* Στυλ για το κουμπί εξαγωγής PDF (χρησιμοποιεί ήδη την κλάση .export-button) */
-/* Ελέγχουμε αν υπάρχει ήδη το στυλ για .export-button από την προηγούμενη απάντηση */
-/* .export-button { ... } */
-
-/* ... (ο υπόλοιπος κώδικας του style.css παραμένει) ... */
-/* ... (ο προηγούμενος κώδικας του style.css παραμένει) ... */
-
-/* Στυλ για το πεδίο αναζήτησης */
-.search-group {
-    margin-bottom: 20px; /* Διάστημα κάτω από το πεδίο αναζήτησης */
-}
-
-.search-group label {
-    margin-right: 10px; /* Διάστημα μεταξύ label και input */
-}
-
-.search-group input[type="text"] {
-    /* Τα γενικά στυλ input εφαρμόζονται */
-    display: inline-block; /* Για να είναι στην ίδια γραμμή με το label */
-    width: auto; /* Το πλάτος θα προσαρμοστεί */
-     max-width: 250px; /* Μέγιστο πλάτος */
-}
-
-/* ... (ο προηγούμενος κώδικας του style.css παραμένει) ... */
-
-/* Στυλ για το Modal */
-.modal {
-    display: none; /* Κρύβεται by default */
-    position: fixed; /* Μένει στη θέση του ακόμα κι αν γίνει scroll */
-    z-index: 1; /* Πάνω από όλα τα άλλα στοιχεία */
-    left: 0;
-    top: 0;
-    width: 100%; /* Πλήρες πλάτος */
-    height: 100%; /* Πλήρες ύψος */
-    overflow: auto; /* Επιτρέπει scroll σε όλο το modal αν χρειαστεί (π.χ. σε πολύ μικρές οθόνες) */
-    background-color: rgba(0,0,0,0.4); /* Σκούρο background με διαφάνεια */
-}
-
-.modal-content {
-    background-color: #fefefe; /* Λευκό φόντο */
-    margin: 5% auto; /* 5% από πάνω, κεντραρισμένο οριζόντια */
-    padding: 20px;
-    border: 1px solid #888;
-    width: 90%; /* Πλάτος modal (μπορεί να προσαρμοστεί) */
-    max-width: 1000px; /* Αυξάνουμε το μέγιστο πλάτος για να χωράει ο πίνακας */
-    max-height: 90vh; /* Περιορίζουμε το μέγιστο ύψος σε 90% του ύψους της οθόνης */
-    overflow-y: auto; /* Προσθέτουμε κάθετο scrollbar στο περιεχόμενο του modal αν ξεπεράσει το max-height */
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    position: relative; /* Για να τοποθετηθεί σωστά το close button */
-    display: flex; /* Χρήση flexbox για διάταξη περιεχομένου */
-    flex-direction: column; /* Τα στοιχεία το ένα κάτω από το άλλο */
-}
-
-.modal-content h2 {
-    margin-top: 0; /* Αφαιρούμε το περιθώριο από τον τίτλο για καλύτερη εμφάνιση */
-    margin-bottom: 15px;
+#signout-button:hover, #signout-button-app:hover {
+    background-color: #c9302c;
 }
 
 
-.close-button {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    position: absolute; /* Απόλυτη τοποθέτηση */
-    top: 10px; /* Απόσταση από πάνω */
-    right: 15px; /* Απόσταση από δεξιά */
-    z-index: 2; /* Πάνω από τον τίτλο */
+#auth-status, #payment-status {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #555;
+    min-height: 1.2em; /* Prevent layout shifts */
 }
 
-.close-button:hover,
-.close-button:focus {
-    color: #000;
-    text-decoration: none;
-    cursor: pointer;
+.hidden {
+    display: none;
 }
 
-/* Container για τον πίνακα μέσα στο modal για χειρισμό οριζόντιου overflow */
-.modal-table-container {
-    overflow-x: auto; /* Προσθέτει οριζόντιο scrollbar αν ο πίνακας είναι πολύ φαρδύς */
-    margin-bottom: 15px; /* Διάστημα κάτω από τον πίνακα */
-    flex-grow: 1; /* Επιτρέπει στο container του πίνακα να παίρνει τον διαθέσιμο χώρο */
-    display: flex; /* Επίσης flexbox για να γεμίσει τον χώρο */
-    flex-direction: column;
+/* Βασικό styling για τις ενότητες */
+#auth-section, #payment-section, #app-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
 }
-
-
-/* Στυλ για τον πίνακα μέσα στο modal */
-#supplier-transactions-table {
-    width: 100%; /* Πιάνει το 100% του container του */
-    border-collapse: collapse;
-    /* margin-top: 20px; */ /* Το διάστημα δίνεται τώρα από το container */
-}
-
-#supplier-transactions-table th,
-#supplier-transactions-table td {
-    padding: 10px;
-    border: 1px solid #dee2e6;
-    text-align: left;
-     white-space: nowrap; /* Αποτροπή αλλαγής γραμμής στα κελιά */
-}
-
-#supplier-transactions-table th {
-     background-color: var(--table-header-bg);
-     color: var(--table-header-color);
-     font-weight: bold;
-     text-transform: uppercase;
-}
-
-#supplier-transactions-table tbody tr:nth-child(even) {
-    background-color: var(--table-row-alt-bg);
-}
-
-#supplier-transactions-table tbody tr:hover {
-     background-color: #e9ecef;
-}
-
-#supplier-transactions-table tfoot td {
-     font-weight: bold;
-     background-color: var(--total-row-bg);
-     border-top: 2px solid #adb5bd;
-     padding: 10px; /* Συνοχή padding */
-}
-
-#supplier-transactions-table tfoot td.total-row {
-    text-align: right;
-    padding-right: 20px;
-}
-
-#supplier-transactions-table tfoot td#modal-transactions-total, /* Τελικό υπόλοιπο */
-#supplier-transactions-table tfoot td#modal-total-cash-credit { /* Σύνολο εκτός καρτών */
-    text-align: left;
-}
-
-
-/* ... (ο υπόλοιπος κώδικας του style.css παραμένει) ... */
-/* ... (ο υπόλοιπος κώδικας του style.css παραμένει) ... */
