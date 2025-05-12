@@ -25,7 +25,7 @@ const appSection = document.getElementById('app-section');
 
 const authMessage = document.getElementById('auth-message'); // Μήνυμα "Παρακαλώ συνδεθείτε"
 const googleSignInButton = document.getElementById('google-signin-button');
-const githubSignInButton = document.getElementById('github-signin-button'); // Νέο κουμπί GitHub
+const githubSignInButton = document.getElementById('github-signin-button'); // Κουμπί GitHub
 
 const emailInput = document.getElementById('email-input'); // Πεδίο Email
 const passwordInput = document.getElementById('password-input'); // Πεδίο Password
@@ -62,7 +62,7 @@ auth.onAuthStateChanged(user => {
 
         // Κρύψε όλα τα στοιχεία της αρχικής ενότητας σύνδεσης
         authSection.classList.add('hidden');
-        // Μπορείς να καθαρίσεις και τα πεδία email/password εδώ αν θέλεις
+        // Καθάρισε τα πεδία email/password
         emailInput.value = '';
         passwordInput.value = '';
 
@@ -87,8 +87,9 @@ auth.onAuthStateChanged(user => {
         authMessage.classList.remove('hidden'); // Εμφάνισε το αρχικό μήνυμα
         googleSignInButton.classList.remove('hidden'); // Εμφάνισε το κουμπί Google
         githubSignInButton.classList.remove('hidden'); // Εμφάνισε το κουμπί GitHub
-        // Δεν χρειάζεται να εμφανίσουμε τη φόρμα email/password ρητά αν είναι ήδη μέσα στο authSection
-        // που εμφανίζεται τώρα.
+        // Τα πεδία email/password και τα κουμπιά τους είναι μέσα στο authSection,
+        // οπότε θα εμφανιστούν και αυτά.
+
 
         authStatusDiv.textContent = 'Παρακαλώ συνδεθείτε.'; // Μήνυμα αποσύνδεσης
 
@@ -119,14 +120,14 @@ googleSignInButton.addEventListener('click', () => {
             // Το onAuthStateChanged θα αναλάβει να ενημερώσει το UI
         })
         .catch((error) => {
-            // Χειρισμός σφαλμάτων.
             const errorCode = error.code;
             const errorMessage = error.message;
             console.error('Google Sign-In Error', errorCode, errorMessage);
             authStatusDiv.textContent = `Σφάλμα Σύνδεσης: ${errorMessage}`;
-            // Επαναφορά UI στην κατάσταση πριν τη σύνδεση
-            authSection.classList.remove('hidden'); // Εμφάνιση αρχικής ενότητας
-            userInfoDiv.classList.add('hidden'); // Απόκρυψη info χρήστη αν εμφανίστηκε προσωρινά
+            // Επαναφορά UI στην κατάσταση πριν τη σύνδεση σε περίπτωση σφάλματος
+            // (Αυτό το κάνει ήδη το onAuthStateChanged όταν user είναι null, αλλά ας το κάνουμε πιο άμεσα)
+             authSection.classList.remove('hidden');
+             userInfoDiv.classList.add('hidden');
         });
 });
 
@@ -145,14 +146,50 @@ githubSignInButton.addEventListener('click', () => {
             console.log('GitHub Sign-In Successful');
         })
         .catch((error) => {
-            // Χειρισμός σφαλμάτων.
             const errorCode = error.code;
             const errorMessage = error.message;
             console.error('GitHub Sign-In Error', errorCode, errorMessage);
-             authStatusDiv.textContent = `Σφάλμα Σύνδεσης GitHub: ${errorMessage}`;
-             // Επαναφορά UI στην κατάσταση πριν τη σύνδεση
-            authSection.classList.remove('hidden'); // Εμφάνιση αρχικής ενότητας
-            userInfoDiv.classList.add('hidden'); // Απόκρυψη info χρήστη αν εμφανίστηκε προσωρινά
+
+            // --- Χειρισμός Σφάλματος: auth/account-exists-with-different-credential ---
+            if (errorCode === 'auth/account-exists-with-different-credential') {
+                const email = error.email; // Παίρνουμε το email από το σφάλμα
+
+                // Χρησιμοποιούμε το fetchSignInMethodsForEmail για να βρούμε
+                // ποιες μέθοδοι σύνδεσης χρησιμοποιούνται ήδη για αυτό το email
+                auth.fetchSignInMethodsForEmail(email).then((methods) => {
+                    let providerMessage = `Ένας λογαριασμός με το email ${email} υπάρχει ήδη. Συνδεθείτε χρησιμοποιώντας: `;
+                    if (methods && methods.length > 0) {
+                        // Δημιουργούμε ένα φιλικό μήνυμα με βάση τους providers που βρήκαμε
+                        providerMessage += methods.map(method => {
+                            // Μετατροπή των Firebase provider IDs σε πιο κατανοητά ονόματα
+                            if (method === 'google.com') return 'Google';
+                            if (method === 'password') return 'Email/Password';
+                            if (method === 'github.com') return 'GitHub'; // Δεν πρέπει να συμβεί σε αυτή την περίπτωση
+                            // Πρόσθεσε άλλους providers αν χρησιμοποιείς
+                            return method; // Επιστροφή του provider ID αν δεν αναγνωριστεί
+                        }).join(' ή '); // Ενώνουμε τους providers με "ή"
+                    } else {
+                         // Εφεδρικό μήνυμα αν για κάποιο λόγο δεν βρεθούν μέθοδοι
+                         providerMessage = `Ένας λογαριασμός με το email ${email} υπάρχει ήδη με άλλη μέθοδο σύνδεσης.`;
+                    }
+                     authStatusDiv.textContent = providerMessage; // Εμφάνιση του μηνύματος στον χρήστη
+                     console.warn(providerMessage); // Επίσης στην κονσόλα
+
+                }).catch((fetchError) => {
+                    // Χειρισμός σφάλματος αν αποτύχει το fetchSignInMethodsForEmail
+                    console.error('Σφάλμα κατά την ανάκτηση μεθόδων σύνδεσης:', fetchError);
+                     authStatusDiv.textContent = `Ένας λογαριασμός με το email ${email} υπάρχει ήδη (σφάλμα ελέγχου).`;
+                });
+
+            } else {
+                // --- Χειρισμός Άλλων Σφαλμάτων Σύνδεσης GitHub ---
+                 authStatusDiv.textContent = `Σφάλμα Σύνδεσης GitHub: ${errorMessage}`;
+                 console.error('Unhandled GitHub Sign-In error:', errorCode, errorMessage);
+            }
+
+             // Πάντα επαναφέρουμε το UI στην κατάσταση πριν τη σύνδεση σε περίπτωση σφάλματος
+            authSection.classList.remove('hidden');
+            userInfoDiv.classList.add('hidden');
         });
 });
 
@@ -178,7 +215,6 @@ emailSignInButton.addEventListener('click', () => {
             authStatusDiv.textContent = 'Επιτυχής σύνδεση!'; // Προσωρινό μήνυμα
         })
         .catch((error) => {
-            // Χειρισμός σφαλμάτων.
             const errorCode = error.code;
             const errorMessage = error.message;
             console.error('Email Sign-In Error', errorCode, errorMessage);
@@ -190,6 +226,9 @@ emailSignInButton.addEventListener('click', () => {
             } else if (errorCode === 'auth/invalid-email') {
                  authStatusDiv.textContent = 'Μη έγκυρη διεύθυνση email.';
             }
+             else if (errorCode === 'auth/user-disabled') {
+                 authStatusDiv.textContent = 'Αυτός ο λογαριασμός έχει απενεργοποιηθεί.';
+             }
             else {
                  authStatusDiv.textContent = `Σφάλμα Σύνδεσης: ${errorMessage}`;
             }
@@ -223,7 +262,6 @@ emailSignUpButton.addEventListener('click', () => {
             // });
         })
         .catch((error) => {
-            // Χειρισμός σφαλμάτων.
             const errorCode = error.code;
             const errorMessage = error.message;
             console.error('Email Sign-Up Error', errorCode, errorMessage);
