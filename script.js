@@ -350,83 +350,35 @@ vivaPaymentButton.addEventListener('click', () => {
     // Αυτό το endpoint θα δημιουργούσε την παραγγελία στο Viva Wallet και θα σου επέστρεφε το URL για ανακατεύθυνση.
 
     // Ασύγχρονη κλήση για να περιμένει το ID Token αν χρειάζεται το backend
-    (async () => {
-        const currentUser = auth.currentUser;
-        if (!currentUser) {
-            paymentStatusDiv.textContent = 'Πρέπει να είστε συνδεδεμένοι για να πληρώσετε.';
-            console.warn('User tried to pay but is not logged in.');
-            // Επαναφορά UI στην κατάσταση πριν την πληρωμή
-             paymentSection.classList.remove('hidden');
-             appSection.classList.add('hidden');
-             signoutButton.classList.remove('hidden');
-             signoutButtonApp.classList.add('hidden');
-            return;
+    async function createOrder() {
+        // Παίρνουμε το token από την Netlify Function
+        const tokenResponse = await fetch('/.netlify/functions/get-viva-token');
+        const tokenData = await tokenResponse.json();
+      
+        if (!tokenData.access_token) {
+          console.error('Αποτυχία λήψης token');
+          return;
         }
-
-        try {
-            // Παίρνουμε το Firebase Auth ID token για να το στείλουμε στο backend
-            // για επαλήθευση του συνδεδεμένου χρήστη (προαιρετικό αλλά συνιστάται)
-            const idToken = await currentUser.getIdToken();
-
-            paymentStatusDiv.textContent = 'Επικοινωνία για δημιουργία παραγγελίας...';
-
-            // Κάνουμε fetch request στο δικό σου backend endpoint (Netlify Function)
-            // ΒΕΒΑΙΩΣΟΥ ΟΤΙ ΤΟ URL ΕΙΝΑΙ ΣΩΣΤΟ: "/.netlify/functions/create-viva-order"
-            // (όπως ρυθμίζεται από το Netlify για τη συνάρτησή σου)
-            const response = await fetch('/.netlify/functions/create-viva-order', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + idToken // Στέλνουμε το token
-                },
-                body: JSON.stringify({
-                    userId: currentUser.uid, // Στέλνεις το User ID
-                    amount: 10.00, // Στέλνεις το ποσό (μπορεί να είναι δυναμικό)
-                    description: 'Πρόσβαση στην Εφαρμογή'
-                    // Άλλες απαραίτητες πληροφορίες
-                })
-            });
-
-            if (!response.ok) {
-                // Χειρισμός σφαλμάτων από το backend
-                const errorBody = await response.text(); // Διάβασε το σώμα της απάντησης για περισσότερες πληροφορίες σφάλματος
-                console.error('Backend Error Response:', response.status, errorBody); // Log ο κωδικός και το σώμα
-                throw new Error(`Backend error: ${response.status} - ${errorBody}`); // Πετάμε ένα error με περισσότερες λεπτομέρειες
-            }
-
-            const data = await response.json();
-
-            if (data.checkoutUrl) { // Υποθέτουμε ότι το backend σου επιστρέφει ένα checkoutUrl
-                console.log('Redirecting to Viva Wallet:', data.checkoutUrl);
-                window.location.href = data.checkoutUrl; // Ανακατεύθυνση
-
-                // Σημείωση: Μετά την ανακατεύθυνση στο Viva Wallet και την ολοκλήρωση της πληρωμής,
-                // ο χρήστης θα επιστρέψει στο URL που έχεις ορίσει στις ρυθμίσεις της Viva Wallet εφαρμογής σου.
-                // ΣΕ ΑΥΤΟ ΤΟ URL ΕΠΙΣΤΡΟΦΗΣ, ΠΡΕΠΕΙ ΝΑ ΕΛΕΓΞΕΙΣ ΤΗΝ ΚΑΤΑΣΤΑΣΗ ΤΗΣ ΠΛΗΡΩΜΗΣ
-                // ΑΣΦΑΛΩΣ (μέσω Viva Wallet API κλήσης από backend ή, ιδανικά, μέσω Viva Wallet Webhooks).
-                // Η συνάρτηση checkPaymentStatus(currentUser.uid) θα πρέπει να καλεστεί ξανά
-                // αφού η κατάσταση πληρωμής ενημερωθεί στη βάση δεδομένων σου από τον webhook handler.
-
-            } else {
-                paymentStatusDiv.textContent = 'Σφάλμα: Η απάντηση από το backend δεν περιέχει URL πληρωμής.';
-                console.error('Backend response missing checkoutUrl', data);
-                 // Επαναφορά UI στην κατάσταση πριν την πληρωμή
-                 paymentSection.classList.remove('hidden');
-                 appSection.classList.add('hidden');
-                 signoutButton.classList.remove('hidden');
-                 signoutButtonApp.classList.add('hidden');
-            }
-        } catch (error) {
-            // Αυτό το catch πιάνει errors από το fetch request ή τα errors που πετάμε εμείς παραπάνω
-            console.error('Fetch or backend error:', error);
-            paymentStatusDiv.textContent = `Σφάλμα κατά την εκκίνηση πληρωμής: ${error.message || 'Άγνωστο σφάλμα'}`; // Εμφάνιση μηνύματος σφάλματος
-            // Επαναφορά UI στην κατάσταση πριν την πληρωμή
-             paymentSection.classList.remove('hidden');
-             appSection.classList.add('hidden');
-             signoutButton.classList.remove('hidden');
-             signoutButtonApp.classList.add('hidden');
+      
+        // Δημιουργούμε την παραγγελία
+        const orderResponse = await fetch('/.netlify/functions/create-viva-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ access_token: tokenData.access_token })
+        });
+      
+        const orderData = await orderResponse.json();
+      
+        if (orderData.checkout_url) {
+          // Ανακατευθύνουμε τον χρήστη στο Viva Wallet για να ολοκληρώσει την πληρωμή
+          window.location.href = orderData.checkout_url;
+        } else {
+          console.error('Αποτυχία δημιουργίας παραγγελίας');
         }
-    })(); // Καλεί την ασύγχρονη συνάρτηση αμέσως
+      }
+      
 });
 
 // --- Application Content Logic (Προαιρετικό) ---
