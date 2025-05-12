@@ -125,14 +125,13 @@ googleSignInButton.addEventListener('click', () => {
             console.error('Google Sign-In Error', errorCode, errorMessage);
             authStatusDiv.textContent = `Σφάλμα Σύνδεσης: ${errorMessage}`;
             // Επαναφορά UI στην κατάσταση πριν τη σύνδεση σε περίπτωση σφάλματος
-            // (Αυτό το κάνει ήδη το onAuthStateChanged όταν user είναι null, αλλά ας το κάνουμε πιο άμεσα)
              authSection.classList.remove('hidden');
              userInfoDiv.classList.add('hidden');
         });
 });
 
 // GitHub Sign In button click handler
-githubSignInButton.addEventListener('click', () => {
+githubSignInButton.addEventListener('click', ()(() => {
     const provider = new firebase.auth.GithubAuthProvider();
     // Προαιρετικά: Πρόσθετα scopes αν τα χρειάζεσαι
     // provider.addScope('read:user'); // Για να διαβάσεις δημόσια στοιχεία χρήστη GitHub
@@ -349,7 +348,7 @@ vivaPaymentButton.addEventListener('click', () => {
 
     // Ιδανικά, εδώ θα έκανες ένα fetch request σε ένα backend endpoint.
     // Αυτό το endpoint θα δημιουργούσε την παραγγελία στο Viva Wallet και θα σου επέστρεφε το URL για ανακατεύθυνση.
-    /*
+
     // Ασύγχρονη κλήση για να περιμένει το ID Token αν χρειάζεται το backend
     (async () => {
         const currentUser = auth.currentUser;
@@ -360,33 +359,47 @@ vivaPaymentButton.addEventListener('click', () => {
         }
 
         try {
-            const idToken = await currentUser.getIdToken(); // Παίρνει το Firebase Auth ID token
-            const response = await fetch('/api/create-viva-order', { // Αντικατάστησε με το δικό σου URL backend
+            // Παίρνουμε το Firebase Auth ID token για να το στείλουμε στο backend
+            // για επαλήθευση του συνδεδεμένου χρήστη (προαιρετικό αλλά συνιστάται)
+            const idToken = await currentUser.getIdToken();
+
+            paymentStatusDiv.textContent = 'Επικοινωνία για δημιουργία παραγγελίας...';
+
+            // Κάνουμε fetch request στο δικό σου backend endpoint
+            // ΑΝΤΙΚΑΤΑΣΤΗΣΕ ΤΟ '/api/create-viva-order' με το URL του δικού σου backend endpoint
+            const response = await fetch('/api/create-viva-order', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + idToken // Στέλνει το token για επαλήθευση στο backend
+                    'Authorization': 'Bearer ' + idToken // Στέλνουμε το token
                 },
                 body: JSON.stringify({
-                    userId: currentUser.uid, // Στέλνεις το User ID στο backend (redundant αν στέλνεις token, αλλά καλή πρακτική)
-                    amount: 10.00, // Το ποσό της πληρωμής
-                    description: 'Πρόσβαση στην Εφαρμογή' // Περιγραφή
-                    // Άλλες απαραίτητες πληροφορίες για την παραγγελία
+                    userId: currentUser.uid, // Στέλνεις το User ID
+                    amount: 10.00, // Στέλνεις το ποσό (μπορεί να είναι δυναμικό)
+                    description: 'Πρόσβαση στην Εφαρμογή'
+                    // Άλλες απαραίτητες πληροφορίες
                 })
             });
 
             if (!response.ok) {
-                const errorBody = await response.text(); // Προσπάθησε να διαβάσεις το σφάλμα από το body
+                // Χειρισμός σφαλμάτων από το backend
+                const errorBody = await response.text();
                 throw new Error(`Backend error: ${response.status} ${response.statusText} - ${errorBody}`);
             }
 
             const data = await response.json();
 
-            if (data.checkoutUrl) { // Υποθέτουμε ότι το backend σου επιστρέφει ένα URL πληρωμής
+            if (data.checkoutUrl) { // Υποθέτουμε ότι το backend σου επιστρέφει ένα checkoutUrl
                 console.log('Redirecting to Viva Wallet:', data.checkoutUrl);
-                window.location.href = data.checkoutUrl; // Ανακατεύθυνση στο Viva Wallet
-                // Μετά την πληρωμή, το Viva Wallet θα ανακατευθύνει τον χρήστη πίσω σε ένα URL που έχεις ορίσει.
-                // Σε αυτό το URL επιστροφής, ΠΡΕΠΕΙ να ελέξεις την κατάσταση της πληρωμής με ασφάλεια (πάλι σε backend, μέσω Viva Wallet API ή webhook).
+                window.location.href = data.checkoutUrl; // Ανακατεύθυνση
+
+                // Σημείωση: Μετά την ανακατεύθυνση στο Viva Wallet και την ολοκλήρωση της πληρωμής,
+                // ο χρήστης θα επιστρέψει στο URL που έχεις ορίσει στις ρυθμίσεις της Viva Wallet εφαρμογής σου.
+                // ΣΕ ΑΥΤΟ ΤΟ URL ΕΠΙΣΤΡΟΦΗΣ, ΠΡΕΠΕΙ ΝΑ ΕΛΕΓΞΕΙΣ ΤΗΝ ΚΑΤΑΣΤΑΣΗ ΤΗΣ ΠΛΗΡΩΜΗΣ
+                // ΑΣΦΑΛΩΣ (μέσω Viva Wallet API κλήσης από backend ή, ιδανικά, μέσω Viva Wallet Webhooks).
+                // Η συνάρτηση checkPaymentStatus(currentUser.uid) θα πρέπει να καλεστεί ξανά
+                // αφού η κατάσταση πληρωμής ενημερωθεί στη βάση δεδομένων σου από τον webhook handler.
+
             } else {
                 paymentStatusDiv.textContent = 'Σφάλμα: Η απάντηση από το backend δεν περιέχει URL πληρωμής.';
                 console.error('Backend response missing checkoutUrl', data);
@@ -394,15 +407,13 @@ vivaPaymentButton.addEventListener('click', () => {
         } catch (error) {
             paymentStatusDiv.textContent = 'Σφάλμα κατά την εκκίνηση πληρωμής.';
             console.error('Fetch or backend error:', error);
+            // Επαναφορά UI στην κατάσταση πριν την πληρωμή αν υπάρξει σφάλμα
+             paymentSection.classList.remove('hidden'); // Εμφάνιση ενότητας πληρωμής
+             appSection.classList.add('hidden'); // Απόκρυψη ενότητας εφαρμογής
+             signoutButton.classList.remove('hidden'); // Εμφάνιση κουμπιού αποσύνδεσης
+             signoutButtonApp.classList.add('hidden'); // Απόκρυψη άλλου κουμπιού αποσύνδεσης
         }
-    })(); // Αυτό καλεί την ασύγχρονη συνάρτηση αμέσως
-    */
-
-    // --- Για σκοπούς επίδειξης (ΠΡΕΠΕΙ ΝΑ ΑΝΤΙΚΑΤΑΣΤΑΘΕΙ ΜΕ ΤΗΝ ΠΑΡΑΠΑΝΩ ΛΟΓΙΚΗ BACKEND ΚΛΗΣΗΣ) ---
-    paymentStatusDiv.textContent = 'Η πληρωμή μέσω Viva Wallet απαιτεί backend integration.';
-    console.warn('Viva Wallet payment initiated from frontend placeholder. Implement backend logic!');
-    // Μετά από μια (υποτιθέμενη) επιτυχή πληρωμή και **ασφαλή** επιβεβαίωση από το backend:
-    // checkPaymentStatus(auth.currentUser.uid); // Κάλεσε ξανά για να δεις αν έχει πληρώσει (αφού ενημερωθεί η κατάσταση στο backend/DB)
+    })(); // Καλεί την ασύγχρονη συνάρτηση αμέσως
 });
 
 // --- Application Content Logic (Προαιρετικό) ---
