@@ -79,3 +79,35 @@ button {
     padding-top: 20px;
     border-top: 1px solid #eee;
 }
+/* Styling για τις πληροφορίες χρήστη μετά τη σύνδεση */
+#user-info {
+    display: flex; /* Για να ευθυγραμμιστούν φωτογραφία και όνομα */
+    align-items: center; /* Κεντράρισμα κάθετα */
+    justify-content: center; /* Κεντράρισμα οριζόντια */
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+#user-photo {
+    width: 50px; /* Μέγεθος φωτογραφίας */
+    height: 50px;
+    border-radius: 50%; /* Κάνει την εικόνα κυκλική */
+    margin-right: 15px; /* Απόσταση από το όνομα */
+    object-fit: cover; /* Εξασφαλίζει ότι η εικόνα καλύπτει τον χώρο χωρίς παραμόρφωση */
+    border: 2px solid #fff; /* Λευκό περίγραμμα */
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+#user-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #555;
+}
+
+/* Κράτα την κλάση hidden όπως είναι */
+.hidden {
+    display: none;
+}
