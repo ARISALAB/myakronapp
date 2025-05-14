@@ -145,7 +145,7 @@ exports.handler = async function(event, context) {
       },
     body: new URLSearchParams({
   grant_type: 'client_credentials',
-  scope: 'ClientCredentials' // <-- ΣΩΣΤΟ για Viva Wallet production
+scope: 'client_credentials'
 })
 
     });
