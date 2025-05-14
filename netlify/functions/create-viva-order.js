@@ -142,14 +142,18 @@ exports.handler = async (event, context) => {
 
          console.log('Creating Viva Wallet order with details:', JSON.stringify(orderDetails)); // Log λεπτομερειών παραγγελίας
 
-        const orderResponse = await fetch(VIVA_ORDERS_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}` // Χρησιμοποιούμε το Access Token
-            },
-            body: JSON.stringify(orderDetails)
-        });
+      const tokenResponse = await fetch(VIVA_TOKEN_URL, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${base64AuthString}`
+    },
+    body: new URLSearchParams({
+        'grant_type': 'client_credentials',
+        'scope': 'payments orders'
+    })
+}); // <-- προστίθεται το κλείσιμο
+
 
         if (!orderResponse.ok) {
              const errorBody = await orderResponse.text();
