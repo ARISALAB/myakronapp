@@ -1,147 +1,95 @@
-// netlify/functions/create-viva-order.js
-
 const fetch = require('node-fetch');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
 
-// Περιβάλλοντα Viva Wallet (PRODUCTION)
+// Αντικατάστησε με τα δικά σου .env μεταβλητά
 const VIVA_CLIENT_ID = process.env.VIVA_CLIENT_ID;
 const VIVA_CLIENT_SECRET = process.env.VIVA_CLIENT_SECRET;
-const VIVA_TOKEN_URL = 'https://accounts.vivapayments.com/connect/token';
-const VIVA_ORDERS_URL = 'https://api.vivapayments.com/checkout/v2/orders';
-const VIVA_CHECKOUT_BASE_URL = 'https://www.vivapayments.com/web/checkout/';
+const VIVA_BASE_URL = 'https://api.vivapayments.com'; // production. Για demo: https://demo.vivapayments.com
+const FIREBASE_SERVICE_ACCOUNT = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
 
-const NETLIFY_SITE_URL = process.env.NETLIFY_URL || process.env.URL;
-const SUCCESS_URL = NETLIFY_SITE_URL + '/payment-success';
-const FAILURE_URL = NETLIFY_SITE_URL + '/payment-failure';
-const CANCEL_URL = NETLIFY_SITE_URL + '/payment-cancelled';
+let db;
+if (!getFirestore.apps?.length) {
+  initializeApp({ credential: cert(FIREBASE_SERVICE_ACCOUNT) });
+  db = getFirestore();
+}
 
-exports.handler = async (event, context) => {
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: 'Method Not Allowed' }),
-      headers: { 'Allow': 'POST', 'Content-Type': 'application/json' }
-    };
-  }
-
-  if (!VIVA_CLIENT_ID || !VIVA_CLIENT_SECRET) {
-    console.error('Viva Wallet credentials not set in environment variables!');
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Server configuration error (Viva Wallet credentials missing)' }),
-      headers: { 'Content-Type': 'application/json' }
-    };
-  }
-
-  let requestBody;
-  try {
-    requestBody = JSON.parse(event.body);
-    if (!requestBody.userId || requestBody.amount === undefined || requestBody.amount === null || requestBody.amount <= 0) {
-      console.error('Validation Error: Missing or invalid userId or amount', requestBody);
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Missing or invalid userId or amount in request body' }),
-        headers: { 'Content-Type': 'application/json' }
-      };
-    }
-  } catch (parseError) {
-    console.error('Failed to parse request body:', parseError);
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'Invalid JSON body' }),
-      headers: { 'Content-Type': 'application/json' }
-    };
-  }
+exports.handler = async function(event, context) {
+  console.log("Requesting Viva Wallet token...");
 
   try {
-    const authString = `${VIVA_CLIENT_ID}:${VIVA_CLIENT_SECRET}`;
-    const base64AuthString = Buffer.from(authString).toString('base64');
-
-    console.log('Requesting Viva Wallet token...');
-
-    const tokenResponse = await fetch(VIVA_TOKEN_URL, {
+    // 1. Ζήτα το access token από Viva
+    const tokenResponse = await fetch(`${VIVA_BASE_URL}/connect/token`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${base64AuthString}`
+        'Authorization': 'Basic ' + Buffer.from(`${VIVA_CLIENT_ID}:${VIVA_CLIENT_SECRET}`).toString('base64'),
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
-   body: new URLSearchParams({
-  'grant_type': 'client_credentials',
-  'scope': 'payments'
-})
-
+      body: new URLSearchParams({
+        grant_type: 'client_credentials'
+        // ΜΗΝ περιλαμβάνεις scope αν σου δίνει σφάλμα
+      })
     });
 
+    const tokenData = await tokenResponse.json();
+
     if (!tokenResponse.ok) {
-      const errorBody = await tokenResponse.text();
-      console.error('Viva Token Error:', tokenResponse.status, errorBody);
+      console.error("Viva Token Error:", tokenResponse.status, tokenData);
       return {
-        statusCode: tokenResponse.status,
-        body: JSON.stringify({ error: `Failed to get Viva Wallet token: ${errorBody}` }),
-        headers: { 'Content-Type': 'application/json' }
+        statusCode: 400,
+        body: JSON.stringify({ error: `Failed to get Viva Wallet token: ${JSON.stringify(tokenData)}` })
       };
     }
 
-    const tokenData = await tokenResponse.json();
     const accessToken = tokenData.access_token;
 
-    console.log('Successfully obtained Viva Wallet token.');
-
-    const orderDetails = {
-      amount: Math.round(requestBody.amount * 100),
-      currencyCode: 'EUR',
-      customerTrns: requestBody.userId,
+    // 2. Δημιούργησε την παραγγελία
+    const orderPayload = {
+      amount: 500, // π.χ. 5 ευρώ
       customer: {
-        customerReference: requestBody.userId
-      },
-      clientReference: `order-${Date.now()}-${requestBody.userId}`,
-      description: requestBody.description || 'Εφαρμογή Πληρωμής',
-      callbackUrls: {
-        successUrl: SUCCESS_URL,
-        failureUrl: FAILURE_URL,
-        cancelUrl: CANCEL_URL
-        // webhook: 'https://your-site.netlify.app/.netlify/functions/viva-webhook'
+        email: "test@example.com" // μπορεί να πάρει και από event.body
       }
     };
 
-    console.log('Creating Viva Wallet order with details:', JSON.stringify(orderDetails));
-
-    const orderResponse = await fetch(VIVA_ORDERS_URL, {
+    const orderResponse = await fetch(`${VIVA_BASE_URL}/checkout/v2/orders`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(orderDetails)
+      body: JSON.stringify(orderPayload)
     });
 
+    const orderData = await orderResponse.json();
+
     if (!orderResponse.ok) {
-      const errorBody = await orderResponse.text();
-      console.error('Viva Order Creation Error:', orderResponse.status, errorBody);
+      console.error("Viva Order Creation Error:", orderResponse.status, orderData);
       return {
-        statusCode: orderResponse.status,
-        body: JSON.stringify({ error: `Failed to create Viva Wallet order: ${errorBody}` }),
-        headers: { 'Content-Type': 'application/json' }
+        statusCode: 400,
+        body: JSON.stringify({ error: `Failed to create Viva order: ${JSON.stringify(orderData)}` })
       };
     }
 
-    const orderData = await orderResponse.json();
-    const orderCode = orderData.order.orderCode;
-    const checkoutUrl = `${VIVA_CHECKOUT_BASE_URL}${orderCode}`;
-
-    console.log('Successfully created Viva Wallet order. Checkout URL:', checkoutUrl);
+    // 3. Αποθήκευσε στο Firestore (προαιρετικά)
+    await db.collection('viva_orders').add({
+      orderCode: orderData.orderCode,
+      amount: orderPayload.amount,
+      email: orderPayload.customer.email,
+      timestamp: new Date()
+    });
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ checkoutUrl }),
-      headers: { 'Content-Type': 'application/json' }
+      body: JSON.stringify({
+        orderCode: orderData.orderCode,
+        checkoutUrl: orderData.checkoutUrl
+      })
     };
-
   } catch (error) {
-    console.error('Server error during Viva Wallet order process:', error);
+    console.error("Unexpected Error:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: `Internal server error: ${error.message}` }),
-      headers: { 'Content-Type': 'application/json' }
+      body: JSON.stringify({ error: 'Internal Server Error' })
     };
   }
 };
