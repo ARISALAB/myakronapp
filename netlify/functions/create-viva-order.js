@@ -64,10 +64,11 @@ exports.handler = async (event, context) => {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': `Basic ${base64AuthString}`
       },
-      body: new URLSearchParams({
-        'grant_type': 'client_credentials',
-        'scope': 'payments orders'
-      })
+   body: new URLSearchParams({
+  'grant_type': 'client_credentials',
+  'scope': 'payments'
+})
+
     });
 
     if (!tokenResponse.ok) {
