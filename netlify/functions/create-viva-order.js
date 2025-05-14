@@ -1,11 +1,6 @@
-const fetch = require('node-fetch');
-// Χρησιμοποιούμε modular imports για το Firebase Admin SDK
-const { initializeApp } = require('firebase-admin/app');
-const { cert } = require('firebase-admin/credential'); // Χρησιμοποιούμε cert από 'credential' για service account object
-const { getFirestore } = require('firebase-admin/firestore');
-// Αν χρειάζεσαι Admin Auth, πρόσθεσε:
-// const { getAuth } = require('firebase-admin/auth');
-
+// Απαιτεί την εγκατάσταση της βιβλιοθήκης: npm install firebase-admin
+const admin = require('firebase-admin');
+const fetch = require('node-fetch'); // Ίσως χρειαστεί npm install node-fetch@2.6.7 αν έχεις θέμα με fetch σε Netlify
 
 // Αντικατάστησε με τις δικές σου μεταβλητές από το Netlify Environment Variables
 const VIVA_CLIENT_ID = process.env.VIVA_CLIENT_ID;
@@ -16,7 +11,6 @@ const VIVA_ORDERS_URL = 'https://api.vivapayments.com/checkout/v2/orders';
 const VIVA_CHECKOUT_BASE_URL = 'https://www.vivapayments.com/web/checkout/';
 
 // Οι URLs επιστροφής μετά την πληρωμή. Πρέπει να ταιριάζουν με τις ρυθμίσεις στο Viva Wallet portal.
-// Χρησιμοποιούμε process.env.URL ή process.env.NETLIFY_URL που παρέχει το Netlify.
 const NETLIFY_SITE_URL = process.env.URL || process.env.NETLIFY_URL;
 const SUCCESS_URL = `${NETLIFY_SITE_URL}/payment-success`;
 const FAILURE_URL = `${NETLIFY_SITE_URL}/payment-failure`;
@@ -27,29 +21,31 @@ const CANCEL_URL = `${NETLIFY_SITE_URL}/payment-cancelled`;
 
 // --- Αρχικοποίηση Firebase Admin SDK (εκτός handler για warm starts) ---
 // ΠΡΕΠΕΙ να γίνει ΜΟΝΟ μία φορά.
-let adminApp; // Κρατάμε αναφορά στην initialized app
 let db; // Κρατάμε αναφορά στο Firestore
+// Αν χρειάζεσαι Admin Auth:
+// let authAdmin;
 
-// Ελέγχουμε αν το Admin SDK έχει ήδη αρχικοποιηθεί.
-// getApps() επιστρέφει λίστα των apps, οπότε ελέγχουμε το μήκος της.
-if (!initializeApp.getApps().length) {
+// Χρησιμοποιούμε admin.apps.length για να ελέγξουμε αν έχει αρχικοποιηθεί.
+// Αυτή η ιδιότητα υπάρχει στο κύριο αντικείμενο admin.
+if (!admin.apps.length) {
     try {
         // Διαβάζουμε και κάνουμε parse το JSON string του Service Account Key
         // από την environment variable.
-        // !! ΒΕΒΑΙΩΣΟΥ ΟΤΙ Η NETLIFY VARIABLE ΣΟΥ ΛΕΓΕΤΑΙ ΑΚΡΙΒΩΣ FIREBASE_SERVICE_ACCOUNT !!
+        // Χρησιμοποιούμε το όνομα που φαίνεται να είναι σωστό πλέον: FIREBASE_SERVICE_ACCOUNT
         const serviceAccountJson = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
         // Αρχικοποίηση του Admin SDK με τα credentials.
-        adminApp = initializeApp({
-             credential: cert(serviceAccountJson), // Χρησιμοποιούμε το parsed JSON object
+        // Χρησιμοποιούμε admin.credential.cert() και admin.initializeApp() από το κύριο αντικείμενο admin.
+        admin.initializeApp({
+             credential: admin.credential.cert(serviceAccountJson), // Χρησιμοποιούμε admin.credential.cert()
              // Αν χρησιμοποιείς Realtime Database, πρόσθεσε το databaseURL εδώ:
              // databaseURL: "https://YOUR-REALTIME-DATABASE-NAME.firebaseio.com"
         });
 
-        // Παίρνουμε την αναφορά για το Firestore από την initialized app
-        db = getFirestore(adminApp);
+        // Παίρνουμε την αναφορά για το Firestore από το κύριο αντικείμενο admin
+        db = admin.firestore();
         // Αν χρειάζεσαι Admin Auth:
-        // const authAdmin = getAuth(adminApp);
+        // authAdmin = admin.auth();
 
         console.log('✅ Firebase Admin Initialized successfully (create-viva-order).');
 
@@ -61,10 +57,11 @@ if (!initializeApp.getApps().length) {
     }
 } else {
      // Αν το app έχει ήδη αρχικοποιηθεί (warm start), παίρνουμε την υπάρχουσα instance.
-     adminApp = initializeApp.getApps()[0];
-     db = getFirestore(adminApp);
+     // Δεν χρειάζεται να την ξανα-αρχικοποιήσουμε.
+     // Παίρνουμε απλώς τις αναφορές στις υπηρεσίες.
+     db = admin.firestore();
      // Αν χρειάζεσες Admin Auth:
-     // const authAdmin = getAuth(adminApp);
+     // authAdmin = admin.auth();
     console.log('ℹ️ Firebase Admin already initialized (create-viva-order).');
 }
 // --- Τέλος Αρχικοποίησης Firebase Admin SDK ---
@@ -148,7 +145,7 @@ exports.handler = async function(event, context) {
       },
       body: new URLSearchParams({
         grant_type: 'client_credentials', // Ζητάμε token για την ίδια την εφαρμογή (όχι για χρήστη)
-        scope: 'payments' // <-- ΕΠΑΝΑΦΕΡΟΥΜΕ ΤΟ SCOPE 'payments'
+        scope: 'payments' // <-- ΕΠΑΝΑΦΕΡΑΜΕ ΤΟ ΣΩΣΤΟ SCOPE
       })
     });
 
