@@ -143,10 +143,11 @@ exports.handler = async function(event, context) {
         'Content-Type': 'application/x-www-form-urlencoded', // Αυτό το endpoint περιμένει form data
         'Authorization': `Basic ${base64AuthString}`
       },
-      body: new URLSearchParams({
-        grant_type: 'client_credentials', // Ζητάμε token για την ίδια την εφαρμογή (όχι για χρήστη)
-        scope: 'payments' // <-- ΕΠΑΝΑΦΕΡΑΜΕ ΤΟ ΣΩΣΤΟ SCOPE
-      })
+    body: new URLSearchParams({
+  grant_type: 'client_credentials',
+  scope: 'ClientCredentials' // <-- ΣΩΣΤΟ για Viva Wallet production
+})
+
     });
 
     // Ελέγχουμε την απάντηση για σφάλματα
